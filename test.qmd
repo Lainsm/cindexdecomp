@@ -1,0 +1,46 @@
+```{r library}
+
+# Install from source
+install.packages("G:/My Drive/r_project/cindexdecomp", 
+                 repos = NULL, 
+                 type  = "source")
+
+
+```
+
+```{r test}
+library(dplyr)
+library(survival)
+library(cindexdecomp)
+
+# Remove NAs first
+lung_clean <- lung %>% 
+  filter(!is.na(time), !is.na(status), !is.na(age), 
+         !is.na(sex), !is.na(ph.ecog))
+
+fit  <- coxph(Surv(time, status - 1) ~ age + sex + ph.ecog, 
+              data = lung_clean)
+risk <- predict(fit, type = "lp")
+
+# Test decompose
+result <- decompose_cindex(
+  time   = lung_clean$time,
+  status = lung_clean$status - 1,  # convert 1/2 to 0/1
+  risk   = risk
+)
+print(result)
+
+# Test simulate
+sim <- simulate_censoring(
+  time      = lung_clean$time,
+  status    = lung_clean$status - 1,
+  risk      = risk,
+  n_thresholds = 50,
+  min_pairs = 500
+)
+print(head(sim))
+
+# Test plots
+plot_simulation(sim)
+
+```

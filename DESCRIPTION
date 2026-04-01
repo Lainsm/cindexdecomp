@@ -1,10 +1,19 @@
 Package: cindexdecomp
-Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
+Title: C-Index Decomposition for Survival Models
+Version: 0.1.0
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
+    person("Malik J.", "Lainsbury", , "mjl221@cam.ac.uk", role = c("aut", "cre"))
+Description: Decomposes Harrell's Concordance Index into Event-Event 
+    and Event-Censored components to expose performance masking in 
+    highly censored survival data.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.0.0
+RoxygenNote: 7.3.3
+Imports:
+    survival,
+    ggplot2,
+    dplyr,
+    tidyr,
+    scales,
+    magrittr
