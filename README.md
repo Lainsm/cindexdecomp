@@ -11,10 +11,9 @@ Harrell's Concordance Index is used in over 80% of survival model
 publications. In highly censored datasets it creates a false illusion 
 of performance by pooling two fundamentally different ranking tasks:
 
-- **Event-Event pairs (C_ee):** Both patients experience the event — 
-  the hard task
+- **Event-Event pairs (C_ee):** Both patients experience the event. This is the harder task to rank.
 - **Event-Censored pairs (C_ec):** One patient experiences the event, 
-  one is censored — the easy task
+ one is censored.
 
 As censoring rises, Event-Event pairs vanish and C_ec dominates the 
 global score. A model near random chance on true events (C_ee ≈ 0.50) 
@@ -94,10 +93,10 @@ decompose_cindex(time, status, rsf_risk)
 
 ## Limitations
 
-- Assumes non-informative censoring
-- C_ee becomes unstable when N_ee is small
-- Evaluates discrimination only — not calibration
-- Simulation freezes risk scores from pre-trained model
+- Assumes non-informative censoring meaning that the censoring is not dependant of the event of interest.
+- C_ee becomes extremely unstable when N_ee is small.
+- Evaluates discrimination only, not calibration.
+- The simulation freezes risk scores from pre-trained model.
 
 ## Citation
 ```
