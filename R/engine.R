@@ -13,6 +13,14 @@
 #' @param time,status,risk Numeric vectors of equal length.
 #' @param weights A `cindex_weights` object.
 #' @return A list with `W_ee`, `S_ee`, `W_ec`, `S_ec`, `N_ee`, `N_ec`.
+#'   `W_*` and `S_*` are weighted totals. `N_ee` and `N_ec` count
+#'   *contributing* pairs -- those receiving non-zero weight. Under any
+#'   strictly positive weighting (Harrell's included) that equals the total
+#'   number of comparable pairs; under a truncating weighting such as
+#'   `weights_truncated()` or `weights_uno(tau = )`, pairs beyond `tau` are
+#'   excluded from both the weighted totals and these counts, because
+#'   truncation excludes a pair from the estimator rather than
+#'   down-weighting it.
 #' @keywords internal
 #' @noRd
 pair_counts <- function(time, status, risk, weights) {

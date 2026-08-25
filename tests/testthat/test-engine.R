@@ -29,8 +29,11 @@ test_that("pooled decomposition matches survival::concordance, continuous times"
 })
 
 test_that("pooled decomposition matches survival::concordance, TIED times", {
-  # Regression: `time > time[i]` dropped 1,062 event-censored tied pairs and
-  # biased the estimate by +0.0007 on this fixture.
+  # Regression: `time > time[i]` dropped event-censored pairs at tied times.
+  # On this fixture that loses 53 pairs and biases the estimate by +9.0e-05.
+  # (The 1,062-pair / +0.0007 figures quoted in the spec and NEWS were
+  # measured on an earlier, more heavily tied fixture; both are real, they
+  # just describe different tie densities.)
   d <- make_test_data(300, ties = TRUE, seed = 1)
   pc <- pair_counts(d$time, d$status, d$risk, weights_harrell())
   expect_equal(pooled_from(pc), harrell_ref(d)$concordance, tolerance = 1e-12)
@@ -148,4 +151,15 @@ test_that("a non-finite weight is an error", {
     pair_counts(d$time, d$status, d$risk, w),
     "negative or non-finite"
   )
+})
+
+test_that("N_ee and N_ec count only contributing (non-zero-weight) pairs", {
+  d <- make_test_data(200, seed = 13)
+  tau <- stats::quantile(d$time[d$status == 1], 0.5, names = FALSE)
+  full <- pair_counts(d$time, d$status, d$risk, weights_harrell())
+  trunc <- pair_counts(d$time, d$status, d$risk, weights_truncated(tau))
+  # Truncation excludes pairs from the estimator, so it must reduce the
+  # contributing counts, not merely their weights.
+  expect_lt(trunc$N_ee + trunc$N_ec, full$N_ee + full$N_ec)
+  expect_gt(trunc$N_ee + trunc$N_ec, 0)
 })
