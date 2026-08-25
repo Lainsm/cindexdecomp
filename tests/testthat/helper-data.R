@@ -8,7 +8,12 @@ make_test_data <- function(n = 300, censor_rate = 0.4, ties = FALSE, seed = 1) {
   cens_time <- rexp(n, rate = 0.1 * censor_rate / (1 - censor_rate))
   time <- pmin(event_time, cens_time)
   status <- as.numeric(event_time <= cens_time)
-  if (ties) time <- round(time)
+  # Day-scale rounding. Real survival data is recorded in whole days:
+  # survival::lung has 149 unique times among 167 subjects, with a maximum
+  # tie group of 3. Rounding the raw scale directly would instead pile 300
+  # subjects onto ~31 distinct times with ~10% at time zero, which is not
+  # a tie pattern any real dataset exhibits.
+  if (ties) time <- round(time * 30) + 1
   # guarantee at least two events so validation never trips on the fixture
   if (sum(status) < 2) {
     status[order(time)[1:2]] <- 1

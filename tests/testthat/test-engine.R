@@ -79,23 +79,24 @@ test_that("Uno under TIED times agrees with survival only approximately", {
   # once times are tied, because tie-clumping amplifies the difference
   # between per-pair and per-time weighting.
   #
-  # TOLERANCE NOTE (deviates from the task-3 brief -- see task-3-report.md):
-  # the brief quoted a measured gap of 1.2e-4 for this exact fixture
-  # (n = 300, ties = TRUE, seed = 5), elsewhere in the same brief quoted
-  # 3.4e-4 for what should be the same base case, and set this test's
-  # tolerance to 1e-3. Re-measuring the verbatim engine above against this
-  # exact pinned fixture gives a relative gap of 1.205e-3 -- ten times the
-  # smaller quoted figure, and just over the specified 1e-3 tolerance
-  # (fails with "Mean relative difference: 0.0012"). A 10-seed sweep of
-  # the same fixture family (n = 300, ties = TRUE, censor_rate = 0.4,
-  # seeds 1-10) shows relative gaps from 6e-4 to 8.2e-3, so seed 5 is not
-  # an outlier: 1e-3 tolerance would only pass 2 of the 10 seeds. The gap
-  # really is O(1e-3) for this heavily tie-clumped synthetic fixture
-  # (lung, which ties less densely, measures 2.1e-4 here -- close to the
-  # brief's lung figure of 2.7e-4). Tolerance widened to 1e-2 to keep
-  # comfortable margin over the actually-measured gap while still failing
-  # on a real regression (e.g. it would catch the old `time > time[i]`
-  # defect immediately).
+  # The magnitude of that gap depends on the fixture's tie pattern, not
+  # just on whether ties exist at all. `make_test_data(ties = TRUE)`
+  # rounds to whole-unit day-scale times, matching real data. On this
+  # fixture family (n = 300, censor_rate = 0.4, seeds 1-5) the *absolute*
+  # gap against survival ranges from 8.8e-5 to 3.8e-4. `expect_equal()`'s
+  # `tolerance` is relative-scaled (waldo::compare divides by the target's
+  # magnitude, here ~0.7), so the number that actually governs this test
+  # is the *relative* gap, which ranges from 1.3e-4 to 5.3e-4 over the
+  # same seeds -- comfortably inside the 1e-3 tolerance, worst case
+  # ~1.9x margin (seed 2). Real survival::lung data (185 unique times
+  # among 227 ph.ecog-complete subjects, max tie group 3) measures an
+  # absolute gap of 1.3e-4 / relative gap of 2.1e-4. (An earlier draft of
+  # this fixture rounded the raw continuous scale directly, which piled
+  # 300 subjects onto ~31 distinct times with ~10% at time zero -- a tie
+  # pattern no real dataset exhibits -- and inflated the relative gap
+  # past 1e-3 on most seeds. That was a fixture defect, not a property of
+  # Uno's pairwise estimator, and was fixed rather than compensated for
+  # with a looser tolerance.)
   #
   # Per-PAIR weighting is what makes the decomposition possible at all: a
   # per-event-time weight cannot be partitioned into event-event and
@@ -111,7 +112,7 @@ test_that("Uno under TIED times agrees with survival only approximately", {
     survival::Surv(d$time, d$status) ~ d$risk,
     reverse = TRUE, timewt = "n/G2"
   )$concordance
-  expect_equal(pooled_from(pc), ref, tolerance = 1e-2)
+  expect_equal(pooled_from(pc), ref, tolerance = 1e-3)
 })
 
 test_that("the weighted identity holds for arbitrary custom weights", {
