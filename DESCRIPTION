@@ -1,19 +1,30 @@
 Package: cindexdecomp
 Title: C-Index Decomposition for Survival Models
-Version: 0.1.0
-Authors@R: 
+Version: 0.2.0
+Authors@R:
     person("Malik J.", "Lainsbury", , "mjl221@cam.ac.uk", role = c("aut", "cre"))
-Description: Decomposes Harrell's Concordance Index into Event-Event 
-    and Event-Censored components to expose performance masking in 
-    highly censored survival data.
+Description: Decomposes concordance indices for survival models into
+    Event-Event and Event-Censored components to expose performance
+    masking in highly censored data. Supports Harrell's C, Uno's
+    inverse-probability-of-censoring-weighted C, time-truncated C, and
+    user-supplied pair weightings through a single engine.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
+Depends:
+    R (>= 4.1.0)
 Imports:
-    survival,
     ggplot2,
-    dplyr,
-    tidyr,
     scales,
-    magrittr
+    stats,
+    survival
+Suggests:
+    covr,
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+VignetteBuilder: knitr
+URL: https://github.com/Lainsm/cindexdecomp
+BugReports: https://github.com/Lainsm/cindexdecomp/issues
