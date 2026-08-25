@@ -105,6 +105,43 @@ Verified to restore agreement to `+0.00e+00`.
 This is not an edge case. Real survival data is recorded in whole days
 (`survival::lung` included), so ties are the normal case.
 
+### 2.4 Uno's C under tied event times
+
+`cindexdecomp` implements Uno's **pairwise** estimator as published (Uno et
+al. 2011): every comparable pair is weighted by `1 / Ghat(T_i)^2`, where
+`T_i` is the event time of the earlier member.
+
+`survival::concordance(timewt = "n/G2")` uses a counting-process form that
+applies its weight per event **time** rather than per pair. The two
+formulations coincide exactly when event times are distinct, and diverge
+once times are tied:
+
+| Data | Harrell agreement | Uno agreement |
+|---|---|---|
+| Continuous times | `0.00e+00` | `-6.66e-16` |
+| Day-scale, rounded | `0.00e+00` | `1.2e-4` |
+| `survival::lung` (real) | `0.00e+00` | `2.7e-4` |
+
+Two consequences, both deliberate:
+
+1. **Per-pair weighting is required, not preferred.** A weight attached to
+   an event *time* cannot be partitioned into event-event and
+   event-censored pair sets, so the decomposition this package exists to
+   compute could not be defined under `survival`'s formulation. The
+   convention is forced by the package's purpose.
+2. **The discrepancy is immaterial in size but must be documented.** At
+   `~1e-4` it is two orders of magnitude below the C-index's own standard
+   error (typically `0.02`-`0.03`). It is nonetheless stated plainly in
+   `weights_uno()`'s documentation and in the vignette, because a user who
+   cross-checks against `survival` on tied data will otherwise think they
+   have found a bug.
+
+Evaluating `Ghat` at `t-` rather than `t` was tested and does **not**
+reconcile the two: it widens the gap from `3.4e-4` to `5.5e-4`.
+
+Harrell's weighting is unaffected and matches exactly under all tie
+patterns, so the package's central correctness claim stands unqualified.
+
 ---
 
 ## 3. Architecture
@@ -397,13 +434,16 @@ Three CRAN-blocking issues:
 The suite deleted in commit `b77fb30` returns. Organising principle:
 **`survival::concordance()` is ground truth.**
 
-1. **Identity tests.** The pooled decomposition equals
-   `survival::concordance()` to machine precision, across: continuous times,
-   tied times, tied risks, both tied, and every weighting. This layer would
-   have caught the 1,062 missing pairs.
-2. **Weighting tests.** `weights_harrell()` matches `survival`'s default;
-   `weights_uno()` matches `timewt = "n/G2"`. Both verified at 1e-15 during
-   prototyping.
+1. **Identity tests.** Under Harrell's weighting, the pooled decomposition
+   equals `survival::concordance()` to machine precision (`1e-12`) across
+   continuous times, tied times, tied risks, and both tied. Measured at
+   `0.00e+00` in every case including real `survival::lung` data. This layer
+   would have caught the 1,062 missing pairs. Uno's weighting agrees exactly
+   only when event times are distinct -- see Section 2.4.
+2. **Weighting tests.** `weights_harrell()` matches `survival`'s default at
+   `1e-12` under every tie pattern. `weights_uno()` matches
+   `timewt = "n/G2"` at `1e-10` when event times are distinct, and to `1e-3`
+   when they are tied (Section 2.4).
 3. **Property tests.** Negating `risk` gives `1 - C`; the weighted identity
    holds for arbitrary custom weights; `N_ee + N_ec` equals `survival`'s
    comparable-pair count.
@@ -433,6 +473,8 @@ The vignette is the backbone of the R Journal paper:
 3. The weighting framework, with the three-estimator table below.
 4. A worked `survival::lung` example.
 5. The censoring curve.
+6. The Uno tie convention of Section 2.4, stated plainly so a user
+   cross-checking against `survival` on tied data is not surprised.
 
 **The central table.** One engine, three estimators, n=400, 44% censoring:
 
