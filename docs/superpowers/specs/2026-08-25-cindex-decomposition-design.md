@@ -72,7 +72,7 @@ Weightings covered:
 
 ### 2.2 Explicit scope boundary
 
-Model-based concordance estimators — notably **Gonen-Heller** — are **out
+Model-based concordance estimators — notably **Gönen–Heller** — are **out
 of scope by construction**, not by omission. They integrate over an assumed
 model rather than counting observed comparable pairs, so the event-event /
 event-censored partition is undefined for them. The paper states this as a
@@ -498,7 +498,7 @@ and it is an empirical claim, not a rhetorical one.
 
 ## 11. Non-goals
 
-- Gonen-Heller and other model-based estimators (Section 2.2).
+- Gönen–Heller and other model-based estimators (Section 2.2).
 - Calibration assessment. The package evaluates discrimination only.
 - Model fitting. The package consumes risk scores from any source.
 - Competing risks. Single-event survival only in v1.
