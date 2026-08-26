@@ -33,8 +33,15 @@ test_that("print shows confidence intervals when they exist", {
 test_that("print flags near-chance event-event concordance", {
   d <- make_test_data(300, seed = 5)
   r <- decompose_cindex(d$time, d$status, d$risk)
-  r$C_ee <- 0.51  # force the condition
-  expect_true(any(grepl("chance", capture.output(print(r)))))
+
+  r$C_ee <- 0.51  # near chance: should get the "near chance" wording
+  out_near <- capture.output(print(r))
+  expect_true(any(grepl("near chance", out_near)))
+
+  r$C_ee <- 0.10  # well below chance: a different, more accurate finding
+  out_below <- capture.output(print(r))
+  expect_true(any(grepl("systematically reversed", out_below)))
+  expect_false(any(grepl("near chance", out_below)))
 })
 
 test_that("print returns its input invisibly", {
@@ -60,4 +67,39 @@ test_that("as.data.frame returns one tidy row", {
   expect_true(all(c("C_ee", "C_ec", "C_global", "gap", "N_ee", "N_ec",
                     "weighting") %in% names(df)))
   expect_equal(df$C_ee, r$C_ee, tolerance = 1e-12)
+})
+
+test_that("print and summary agree on the confidence level string", {
+  # Regression guard: the table header and the summary's Bootstrap line
+  # used to format the same conf_level two different ways, so a level
+  # like 0.975 rendered as "97.5 CI" in one place and "98% level" in the
+  # other. Both must show the same string.
+  d <- make_test_data(150, seed = 9)
+  r <- decompose_cindex(d$time, d$status, d$risk, n_boot = 50,
+                        conf_level = 0.975)
+  print_out <- capture.output(print(r))
+  summary_out <- capture.output(print(summary(r)))
+  expect_true(any(grepl("97.5%", print_out, fixed = TRUE)))
+  expect_true(any(grepl("97.5%", summary_out, fixed = TRUE)))
+})
+
+test_that("print caveats a bootstrap with few usable replicates", {
+  # Regression guard: a zero- or near-zero-width interval built from only
+  # a handful of usable replicates must not print as though it were
+  # precise. confint()'s own warning goes to stderr, so capture.output()
+  # (and any report pipeline capturing printed text) would otherwise show
+  # the interval with no caveat at all.
+  d <- make_test_data(10, censor_rate = 0.9, seed = 11)
+  r <- decompose_cindex(d$time, d$status, d$risk, n_boot = 200)
+  expect_lt(r$n_boot_valid, 0.9 * r$n_boot)
+  out <- suppressWarnings(capture.output(print(r)))
+  expect_true(any(grepl("usable", out)))
+})
+
+test_that("print does not caveat a healthy bootstrap", {
+  d <- make_test_data(150, seed = 21)
+  r <- decompose_cindex(d$time, d$status, d$risk, n_boot = 200)
+  expect_equal(r$n_boot_valid, r$n_boot)
+  out <- capture.output(print(r))
+  expect_false(any(grepl("usable", out)))
 })
