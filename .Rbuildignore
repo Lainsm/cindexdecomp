@@ -7,5 +7,6 @@
 ^_pkgdown\.yml$
 ^pkgdown$
 ^doc$
+^docs$
 ^Meta$
 ^LICENSE\.md$

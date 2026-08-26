@@ -4,9 +4,10 @@
 
 * The first argument of `decompose_cindex()` is now `x` rather than
   `time`, as required for S3 dispatch. Calls written as
-  `decompose_cindex(time = t, status = s, risk = r)` will fail with
-  `argument "x" is missing`; call positionally, or use the formula
-  method.
+  `decompose_cindex(time = t, status = s, risk = r)` fail with a
+  self-explanatory error pointing at the fix (call positionally, use
+  `x = `, or use the formula method) rather than a bare
+  `argument "x" is missing` dispatch failure.
 * `decompose_cindex()` returns a `cindex_decomp` object rather than a
   plain list. Existing element access (`$CI_ee`) becomes `$C_ee`.
 * `simulate_censoring()` is renamed `censoring_curve()` and now returns

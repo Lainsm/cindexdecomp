@@ -77,6 +77,53 @@ test_that("theme_cindex sets no font family", {
   expect_false(identical(theme_cindex()$text$family, "Arial"))
 })
 
+test_that("the curve plot's subtitle names what the ribbon actually spans", {
+  # Regression: the ribbon is geom_ribbon(ymin = C_ee, ymax = C_global),
+  # but the subtitle called it "the masking gap" -- a different quantity
+  # (C_ec - C_ee) that is drawn nowhere on this plot. Measured: ribbon
+  # spanned 0.054-0.431 while the true gap spanned 0.064-0.437.
+  skip_if_no_ggplot()
+  d <- make_test_data(250, seed = 8)
+  cv <- censoring_curve(d$time, d$status, d$risk, n_thresholds = 6)
+  p <- ggplot2::autoplot(cv)
+  subtitle <- p$labels$subtitle
+  expect_false(grepl("masking gap", subtitle))
+  expect_true(grepl("C_ee", subtitle, fixed = TRUE))
+})
+
+test_that("the dumbbell plot's error bars are labelled with the level they draw", {
+  # Regression: error bars were xmin/xmax = ci_ee -/+ sd_ee with nothing in
+  # the legend, subtitle or docs stating they were +/-1 SD (~68% coverage),
+  # readable as a 95% interval. Bars now draw the object's own conf_level
+  # percentile interval and the subtitle names the level.
+  skip_if_no_ggplot()
+  d <- make_test_data(200, seed = 9)
+  r <- decompose_cindex(d$time, d$status, d$risk, n_boot = 150,
+                        conf_level = 0.9)
+  p <- ggplot2::autoplot(r)
+  subtitle <- p$labels$subtitle
+  expect_true(grepl("90% CI", subtitle, fixed = TRUE))
+  expect_false(grepl("SD", subtitle, fixed = TRUE))
+
+  built <- ggplot2::ggplot_build(p)
+  errorbar_layers <- vapply(
+    p$layers, function(l) inherits(l$geom, "GeomErrorbar"), logical(1)
+  )
+  expect_true(any(errorbar_layers))
+})
+
+test_that("the dumbbell plot omits error bars, and any CI claim, when n_boot = 0", {
+  skip_if_no_ggplot()
+  d <- make_test_data(150, seed = 10)
+  r <- decompose_cindex(d$time, d$status, d$risk, n_boot = 0)
+  p <- ggplot2::autoplot(r)
+  expect_false(grepl("CI", p$labels$subtitle, fixed = TRUE))
+  errorbar_layers <- vapply(
+    p$layers, function(l) inherits(l$geom, "GeomErrorbar"), logical(1)
+  )
+  expect_false(any(errorbar_layers))
+})
+
 test_that("the curve plot marks low-precision points without dropping them", {
   skip_if_no_ggplot()
   d <- make_test_data(250, seed = 7)

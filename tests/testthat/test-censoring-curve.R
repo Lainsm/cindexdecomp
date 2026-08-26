@@ -4,7 +4,26 @@ test_that("censoring_curve returns a cindex_curve object", {
   expect_s3_class(cv, "cindex_curve")
   expect_s3_class(cv$data, "data.frame")
   expect_true(all(c("threshold", "censoring", "C_ee", "C_ec", "C_global",
-                    "N_ee", "N_ec", "low_precision") %in% names(cv$data)))
+                    "N_ee", "N_ec", "low_precision", "W_ee",
+                    "W_ec") %in% names(cv$data)))
+})
+
+test_that("higher_is_riskier is validated, not silently coerced", {
+  # Regression: `if (!higher_is_riskier) risk <- -risk` treated any
+  # non-logical, non-zero value (e.g. 0) as if it were FALSE via `!0`,
+  # silently negating risk instead of erroring. decompose_cindex() already
+  # rejects this; censoring_curve() must match.
+  d <- make_test_data(200, seed = 20)
+  expect_error(
+    censoring_curve(d$time, d$status, d$risk, higher_is_riskier = 0,
+                    n_thresholds = 4),
+    "TRUE or FALSE"
+  )
+  expect_error(
+    censoring_curve(d$time, d$status, d$risk,
+                    higher_is_riskier = c(TRUE, FALSE), n_thresholds = 4),
+    "TRUE or FALSE"
+  )
 })
 
 test_that("the censoring rate is measured on the WHOLE cohort", {
@@ -60,10 +79,37 @@ test_that("no global value is flipped", {
 })
 
 test_that("the identity holds at every threshold", {
+  # Regression: this test used to assert only `any(ok)` -- true even if the
+  # identity never actually holds -- so it verified nothing about the
+  # decomposition itself. Now it checks
+  # C_global == (W_ee * C_ee + W_ec * C_ec) / (W_ee + W_ec) row by row,
+  # using the curve's own stored W_ee/W_ec (weighted totals), not N_ee/N_ec
+  # (pair counts). Under weights_uno() the two diverge, so reconstructing
+  # from counts would fail here even though the true identity holds.
   d <- make_test_data(300, ties = TRUE, seed = 7)
-  cv <- censoring_curve(d$time, d$status, d$risk, n_thresholds = 6)
+  cv <- censoring_curve(d$time, d$status, d$risk, weights = weights_uno(),
+                        n_thresholds = 6)
   ok <- !is.na(cv$data$C_ee) & !is.na(cv$data$C_ec)
   expect_true(any(ok))
+  for (i in which(ok)) {
+    total_w <- cv$data$W_ee[i] + cv$data$W_ec[i]
+    rhs <- (cv$data$W_ee[i] * cv$data$C_ee[i] +
+            cv$data$W_ec[i] * cv$data$C_ec[i]) / total_w
+    expect_equal(cv$data$C_global[i], rhs, tolerance = 1e-12)
+  }
+})
+
+test_that("W_ee/W_ec equal N_ee/N_ec under a unit weighting but not under IPCW", {
+  d <- make_test_data(300, ties = TRUE, seed = 22)
+  harrell <- censoring_curve(d$time, d$status, d$risk, n_thresholds = 5)
+  expect_equal(harrell$data$W_ee, as.numeric(harrell$data$N_ee),
+              tolerance = 1e-12)
+  expect_equal(harrell$data$W_ec, as.numeric(harrell$data$N_ec),
+              tolerance = 1e-12)
+
+  uno <- censoring_curve(d$time, d$status, d$risk, weights = weights_uno(),
+                        n_thresholds = 5)
+  expect_false(isTRUE(all.equal(uno$data$W_ee, as.numeric(uno$data$N_ee))))
 })
 
 test_that("min_pairs flags rather than filters", {

@@ -28,4 +28,10 @@ A \code{ggplot} object.
 \code{autoplot()} methods for the three result classes. Because the object
 carries its own class, the right plot is selected automatically and a
 result can never be paired with the wrong chart.
+
+The dumbbell plots (\code{cindex_decomp}, \code{cindex_comparison}) draw error
+bars from the object's own bootstrap replicates as a percentile interval
+at its \code{conf_level} (e.g. 95\%), not a symmetric +/-1 SD band; the level
+actually drawn is named in the subtitle. Bars are omitted when no
+bootstrap was run (\code{n_boot = 0}).
 }

@@ -26,5 +26,5 @@ Suggests:
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 VignetteBuilder: knitr
-URL: https://github.com/Lainsm/cindexdecomp
+URL: https://github.com/Lainsm/cindexdecomp, https://Lainsm.github.io/cindexdecomp
 BugReports: https://github.com/Lainsm/cindexdecomp/issues

@@ -49,7 +49,17 @@ be considered precise. Rows below it are \strong{flagged} in the
 \item{optional}{Ignored.}
 }
 \value{
-An object of class \code{cindex_curve}.
+An object of class \code{cindex_curve}. Its \verb{$data} element has one
+row per threshold, with columns \code{threshold}, \code{censoring}, \code{C_ee},
+\code{C_ec}, \code{C_global}, \code{gap}, \code{N_ee}, \code{N_ec}, \code{low_precision}, \code{W_ee} and
+\code{W_ec}. \code{W_ee}/\code{W_ec} are the weighted totals behind \code{C_ee}/\code{C_ec}
+(\code{C_ee = S_ee / W_ee}, etc.), so the decomposition identity is
+verifiable at every row:
+\code{C_global == (W_ee * C_ee + W_ec * C_ec) / (W_ee + W_ec)}. \code{N_ee}/
+\code{N_ec} are pair \emph{counts} and only equal \code{W_ee}/\code{W_ec} under a weighting
+that assigns every comparable pair weight 1 (Harrell's); under
+\code{\link[=weights_uno]{weights_uno()}} or another non-unit weighting the identity does not
+reconstruct from counts alone.
 }
 \description{
 Sweeps a series of administrative cut-off times over the cohort. At each

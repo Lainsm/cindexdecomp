@@ -21,8 +21,9 @@ compare_decompositions(
 \method{as.data.frame}{cindex_comparison}(x, row.names = NULL, optional = FALSE, ...)
 }
 \arguments{
-\item{risks}{A \strong{named} list or data frame of risk-score vectors, each
-the same length as \code{time} and \code{status}. The names label the models.}
+\item{risks}{A \strong{named} list, data frame or matrix of risk-score
+vectors/columns, each the same length as \code{time} and \code{status}. The
+names (or, for a matrix, the column names) label the models.}
 
 \item{time, status}{Numeric vectors describing the shared cohort.}
 
@@ -35,7 +36,8 @@ every model.}
 \item{n_boot}{Bootstrap replicates per model. Defaults to 1000, since
 the comparison table exists to carry uncertainty.}
 
-\item{conf_level}{Confidence level stored on each fit.}
+\item{conf_level}{Confidence level stored on each fit, and used for the
+\verb{ci_*_lo}/\verb{ci_*_hi} percentile bounds below.}
 
 \item{x}{A \code{cindex_comparison} object.}
 
@@ -46,7 +48,16 @@ the comparison table exists to carry uncertainty.}
 \item{optional}{Ignored.}
 }
 \value{
-An object of class \code{cindex_comparison}.
+An object of class \code{cindex_comparison}. Its \verb{$table} element has
+one row per model, with columns \code{model}, \code{ci_ee}, \code{ci_ec}, \code{global_c},
+\code{gap}, \code{sd_ee}, \code{sd_ec}, \code{sd_global}, \code{sd_gap}, \code{n_ee}, \code{n_ec}, \code{w_ee},
+\code{w_ec}, \code{ci_ee_lo}, \code{ci_ee_hi}, \code{ci_ec_lo} and \code{ci_ec_hi}. \code{w_ee}/
+\code{w_ec} are the weighted totals behind \code{ci_ee}/\code{ci_ec}, so
+\code{global_c == (w_ee * ci_ee + w_ec * ci_ec) / (w_ee + w_ec)} is
+verifiable for every row. \code{ci_ee_lo}/\code{ci_ee_hi} and \code{ci_ec_lo}/
+\code{ci_ec_hi} are \code{conf_level} percentile bootstrap bounds (\code{NA} when
+\code{n_boot = 0}); \verb{sd_*} columns are kept alongside them for backward
+compatibility.
 }
 \description{
 Runs \code{\link[=decompose_cindex]{decompose_cindex()}} for each of several risk scores measured on

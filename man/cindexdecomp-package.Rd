@@ -12,6 +12,7 @@ Decomposes concordance indices for survival models into Event-Event and Event-Ce
 Useful links:
 \itemize{
   \item \url{https://github.com/Lainsm/cindexdecomp}
+  \item \url{https://Lainsm.github.io/cindexdecomp}
   \item Report bugs at \url{https://github.com/Lainsm/cindexdecomp/issues}
 }
 

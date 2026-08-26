@@ -6,8 +6,9 @@
 #' standard deviations. This is the input consumed by
 #' `autoplot()` to draw the dumbbell comparison.
 #'
-#' @param risks A **named** list or data frame of risk-score vectors, each
-#'   the same length as `time` and `status`. The names label the models.
+#' @param risks A **named** list, data frame or matrix of risk-score
+#'   vectors/columns, each the same length as `time` and `status`. The
+#'   names (or, for a matrix, the column names) label the models.
 #' @param time,status Numeric vectors describing the shared cohort.
 #' @param weights A `cindex_weights` object. Defaults to
 #'   [weights_harrell()].
@@ -15,9 +16,19 @@
 #'   every model.
 #' @param n_boot Bootstrap replicates per model. Defaults to 1000, since
 #'   the comparison table exists to carry uncertainty.
-#' @param conf_level Confidence level stored on each fit.
+#' @param conf_level Confidence level stored on each fit, and used for the
+#'   `ci_*_lo`/`ci_*_hi` percentile bounds below.
 #'
-#' @return An object of class `cindex_comparison`.
+#' @return An object of class `cindex_comparison`. Its `$table` element has
+#'   one row per model, with columns `model`, `ci_ee`, `ci_ec`, `global_c`,
+#'   `gap`, `sd_ee`, `sd_ec`, `sd_global`, `sd_gap`, `n_ee`, `n_ec`, `w_ee`,
+#'   `w_ec`, `ci_ee_lo`, `ci_ee_hi`, `ci_ec_lo` and `ci_ec_hi`. `w_ee`/
+#'   `w_ec` are the weighted totals behind `ci_ee`/`ci_ec`, so
+#'   `global_c == (w_ee * ci_ee + w_ec * ci_ec) / (w_ee + w_ec)` is
+#'   verifiable for every row. `ci_ee_lo`/`ci_ee_hi` and `ci_ec_lo`/
+#'   `ci_ec_hi` are `conf_level` percentile bootstrap bounds (`NA` when
+#'   `n_boot = 0`); `sd_*` columns are kept alongside them for backward
+#'   compatibility.
 #'
 #' @examples
 #' set.seed(42)
@@ -33,6 +44,11 @@ compare_decompositions <- function(risks, time, status,
                                    higher_is_riskier = TRUE,
                                    n_boot = 1000,
                                    conf_level = 0.95) {
+  if (is.matrix(risks)) {
+    mat_names <- colnames(risks)
+    risks <- as.data.frame(risks)
+    if (is.null(mat_names)) names(risks) <- NULL
+  }
   if (is.data.frame(risks)) risks <- as.list(risks)
   if (!is.list(risks) || length(risks) == 0L) {
     stop("`risks` must be a non-empty named list or data frame of risk scores.",
@@ -63,6 +79,13 @@ compare_decompositions <- function(risks, time, status,
   boot_sd <- function(fit, col) {
     if (is.null(fit$boot)) NA_real_ else stats::sd(fit$boot[, col], na.rm = TRUE)
   }
+  # Percentile bounds at the fit's own conf_level. Uses boot_percentile()
+  # rather than confint() so building the table never emits one
+  # low-reliability warning per model (confint() already surfaces that on
+  # the individual fit, e.g. via print()).
+  ci_bound <- function(fit, col, which) {
+    boot_percentile(fit$boot, col, fit$conf_level)[which]
+  }
 
   tab <- data.frame(
     model = names(fits),
@@ -76,6 +99,12 @@ compare_decompositions <- function(risks, time, status,
     sd_gap = vapply(fits, boot_sd, numeric(1), col = "gap"),
     n_ee = vapply(fits, function(f) f$N_ee, numeric(1)),
     n_ec = vapply(fits, function(f) f$N_ec, numeric(1)),
+    w_ee = vapply(fits, function(f) f$W_ee, numeric(1)),
+    w_ec = vapply(fits, function(f) f$W_ec, numeric(1)),
+    ci_ee_lo = vapply(fits, ci_bound, numeric(1), col = "C_ee", which = 1L),
+    ci_ee_hi = vapply(fits, ci_bound, numeric(1), col = "C_ee", which = 2L),
+    ci_ec_lo = vapply(fits, ci_bound, numeric(1), col = "C_ec", which = 1L),
+    ci_ec_hi = vapply(fits, ci_bound, numeric(1), col = "C_ec", which = 2L),
     stringsAsFactors = FALSE
   )
   rownames(tab) <- NULL
@@ -85,7 +114,8 @@ compare_decompositions <- function(risks, time, status,
       table = tab,
       fits = fits,
       weighting = weights$name,
-      n_boot = n_boot
+      n_boot = n_boot,
+      conf_level = conf_level
     ),
     class = "cindex_comparison"
   )

@@ -56,6 +56,17 @@ decompose_cindex.default <- function(x, status, risk,
                                      weights = weights_harrell(),
                                      higher_is_riskier = TRUE,
                                      n_boot = 0, conf_level = 0.95, ...) {
+  # `x` is required for S3 dispatch, so `decompose_cindex(time = t, ...)`
+  # leaves `x` unmatched and `time` falls through into `...` here (checked
+  # before `x` is touched, since referencing a missing `x` errors first).
+  if ("time" %in% names(list(...))) {
+    stop(
+      "The first argument is named `x` for S3 dispatch, not `time`. ",
+      "Call positionally -- decompose_cindex(time, status, risk) -- ",
+      "or use x = .",
+      call. = FALSE
+    )
+  }
   time <- x
   validate_survival_inputs(time, status, risk)
   if (!inherits(weights, "cindex_weights")) {
@@ -123,7 +134,7 @@ decompose_cindex.formula <- function(x, data = parent.frame(),
                                      weights = weights_harrell(),
                                      higher_is_riskier = TRUE,
                                      n_boot = 0, conf_level = 0.95, ...) {
-  mf <- stats::model.frame(x, data = data)
+  mf <- stats::model.frame(x, data = data, na.action = stats::na.fail)
   resp <- stats::model.response(mf)
   if (!inherits(resp, "Surv")) {
     stop("The left-hand side of the formula must be a Surv() object.",

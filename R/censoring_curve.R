@@ -23,7 +23,17 @@
 #'   `low_precision` column, never removed and never set to `NA`. `NULL`
 #'   (default) selects `max(50, round(n_events^1.5 * 0.1))`.
 #'
-#' @return An object of class `cindex_curve`.
+#' @return An object of class `cindex_curve`. Its `$data` element has one
+#'   row per threshold, with columns `threshold`, `censoring`, `C_ee`,
+#'   `C_ec`, `C_global`, `gap`, `N_ee`, `N_ec`, `low_precision`, `W_ee` and
+#'   `W_ec`. `W_ee`/`W_ec` are the weighted totals behind `C_ee`/`C_ec`
+#'   (`C_ee = S_ee / W_ee`, etc.), so the decomposition identity is
+#'   verifiable at every row:
+#'   `C_global == (W_ee * C_ee + W_ec * C_ec) / (W_ee + W_ec)`. `N_ee`/
+#'   `N_ec` are pair *counts* and only equal `W_ee`/`W_ec` under a weighting
+#'   that assigns every comparable pair weight 1 (Harrell's); under
+#'   [weights_uno()] or another non-unit weighting the identity does not
+#'   reconstruct from counts alone.
 #'
 #' @examples
 #' set.seed(42)
@@ -42,6 +52,9 @@ censoring_curve <- function(time, status, risk,
   validate_survival_inputs(time, status, risk)
   if (!inherits(weights, "cindex_weights")) {
     stop("`weights` must be a `cindex_weights` object.", call. = FALSE)
+  }
+  if (!is.logical(higher_is_riskier) || length(higher_is_riskier) != 1L) {
+    stop("`higher_is_riskier` must be TRUE or FALSE.", call. = FALSE)
   }
   if (!higher_is_riskier) risk <- -risk
 
@@ -76,7 +89,9 @@ censoring_curve <- function(time, status, risk,
       gap = C_ec - C_ee,
       N_ee = pc$N_ee,
       N_ec = pc$N_ec,
-      low_precision = pc$N_ee < min_pairs
+      low_precision = pc$N_ee < min_pairs,
+      W_ee = pc$W_ee,
+      W_ec = pc$W_ec
     )
   })
 

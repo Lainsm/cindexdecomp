@@ -38,6 +38,30 @@ bootstrap_decomp <- function(time, status, risk, weights, n_boot) {
   out
 }
 
+#' Percentile interval from a stored bootstrap matrix
+#'
+#' Internal helper shared by [confint.cindex_decomp()],
+#' [compare_decompositions()] and the dumbbell `autoplot()` methods, so all
+#' three compute the same percentile interval from the same replicates.
+#' Unlike `confint.cindex_decomp()` this never warns about replicate
+#' reliability -- callers that build a table across several models would
+#' otherwise emit one warning per model.
+#'
+#' @param boot A bootstrap matrix as returned by `bootstrap_decomp()`, or
+#'   `NULL`.
+#' @param col Column name to extract.
+#' @param level Confidence level, strictly between 0 and 1.
+#' @return A length-2 numeric vector `c(lower, upper)`, or `c(NA, NA)` if
+#'   `boot` is `NULL`.
+#' @keywords internal
+#' @noRd
+boot_percentile <- function(boot, col, level) {
+  if (is.null(boot)) return(c(NA_real_, NA_real_))
+  a <- (1 - level) / 2
+  stats::quantile(boot[, col], probs = c(a, 1 - a), na.rm = TRUE,
+                  names = FALSE)
+}
+
 #' Bootstrap confidence intervals for a concordance decomposition
 #'
 #' @param object A `cindex_decomp` object created with `n_boot > 0`.
@@ -65,6 +89,11 @@ confint.cindex_decomp <- function(object,
     )
   }
   if (is.null(level)) level <- object$conf_level
+  if (!is.numeric(level) || length(level) != 1L ||
+      level <= 0 || level >= 1) {
+    stop("`level` must be a single number strictly between 0 and 1.",
+         call. = FALSE)
+  }
   parm <- match.arg(parm, c("C_ee", "C_ec", "C_global", "gap"),
                     several.ok = TRUE)
   n_valid <- sum(stats::complete.cases(object$boot))

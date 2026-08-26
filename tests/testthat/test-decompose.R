@@ -90,3 +90,44 @@ test_that("censoring rate and counts are recorded", {
 test_that("invalid input is rejected", {
   expect_error(decompose_cindex(1:5, c(0, 1, 0, 1), rnorm(5)), "same length")
 })
+
+test_that("the formula method rejects NA the same way the vector method does", {
+  # Regression: stats::model.frame()'s default na.action is na.omit, so the
+  # formula method silently dropped NA rows (changing the analysis
+  # population with no message) while the vector method, via
+  # validate_survival_inputs(), errored on the same data. Both entry
+  # points must now agree.
+  set.seed(30)
+  n <- 100
+  d <- make_test_data(n, seed = 30)
+  risk_na <- d$risk
+  risk_na[c(3, 47, 90)] <- NA
+  df <- data.frame(time = d$time, status = d$status, risk = risk_na)
+
+  expect_error(
+    decompose_cindex(d$time, d$status, risk_na),
+    "NA"
+  )
+  expect_error(
+    decompose_cindex(survival::Surv(time, status) ~ risk, data = df),
+    "missing"
+  )
+})
+
+test_that("time = gives a self-explanatory error, not a missing-argument one", {
+  # Regression: decompose_cindex(time = t, status = s, risk = r) failed
+  # with `argument "x" is missing, with no default`, because S3 dispatch
+  # forces the generic's first parameter to be `x`. censoring_curve()'s
+  # equivalent call style works fine, so this asymmetry needs an
+  # explanatory error rather than a bare dispatch failure.
+  d <- make_test_data(50, seed = 31)
+  expect_error(
+    decompose_cindex(time = d$time, status = d$status, risk = d$risk),
+    "not `time`"
+  )
+  # x = still works (it's the correct, S3-required spelling).
+  expect_s3_class(
+    decompose_cindex(x = d$time, status = d$status, risk = d$risk),
+    "cindex_decomp"
+  )
+})

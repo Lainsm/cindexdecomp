@@ -74,6 +74,20 @@ test_that("confint returns intervals containing the point estimates", {
   expect_gte(ci["gap", 2], r$gap)
 })
 
+test_that("confint validates level the same way decompose_cindex validates conf_level", {
+  # Regression: confint.cindex_decomp() used `level` raw. level = -0.2
+  # produced probs c(0.6, 0.4) -- an inverted interval, lower bound above
+  # upper -- and level = 0 produced a zero-width interval, both silently.
+  # decompose_cindex() already rejects conf_level outside (0, 1); confint()
+  # must match for `level`.
+  d <- make_test_data(150, seed = 22)
+  r <- decompose_cindex(d$time, d$status, d$risk, n_boot = 100)
+  expect_error(confint(r, level = -0.2), "between 0 and 1")
+  expect_error(confint(r, level = 0), "between 0 and 1")
+  expect_error(confint(r, level = 1), "between 0 and 1")
+  expect_error(confint(r, level = c(0.9, 0.95)), "between 0 and 1")
+})
+
 test_that("confint respects the level argument", {
   d <- make_test_data(200, seed = 8)
   r <- decompose_cindex(d$time, d$status, d$risk, n_boot = 300)

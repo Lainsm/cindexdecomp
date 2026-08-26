@@ -5,6 +5,12 @@
 #' carries its own class, the right plot is selected automatically and a
 #' result can never be paired with the wrong chart.
 #'
+#' The dumbbell plots (`cindex_decomp`, `cindex_comparison`) draw error
+#' bars from the object's own bootstrap replicates as a percentile interval
+#' at its `conf_level` (e.g. 95%), not a symmetric +/-1 SD band; the level
+#' actually drawn is named in the subtitle. Bars are omitted when no
+#' bootstrap was run (`n_boot = 0`).
+#'
 #' @param object A `cindex_decomp`, `cindex_curve` or `cindex_comparison`
 #'   object.
 #' @param dark Logical. Passed to [theme_cindex()].
@@ -13,10 +19,12 @@
 #' @name autoplot.cindexdecomp
 NULL
 
-dumbbell_plot <- function(tab, weighting, dark) {
+dumbbell_plot <- function(tab, weighting, dark, conf_level = NULL) {
   p <- cindex_palette(dark)
   tab$model <- factor(tab$model, levels = rev(unique(tab$model)))
-  has_sd <- all(is.finite(tab$sd_ee))
+  ci_cols <- c("ci_ee_lo", "ci_ee_hi", "ci_ec_lo", "ci_ec_hi")
+  has_ci <- all(ci_cols %in% names(tab)) &&
+    all(vapply(tab[ci_cols], function(col) all(is.finite(col)), logical(1)))
 
   gg <- ggplot2::ggplot(tab) +
     ggplot2::geom_vline(xintercept = 0.5, linetype = "dashed",
@@ -27,21 +35,30 @@ dumbbell_plot <- function(tab, weighting, dark) {
       colour = p$grid, linewidth = 2
     )
 
-  if (has_sd) {
+  if (has_ci) {
     gg <- gg +
       ggplot2::geom_errorbar(
-        ggplot2::aes(xmin = .data$ci_ee - .data$sd_ee,
-                     xmax = .data$ci_ee + .data$sd_ee,
+        ggplot2::aes(xmin = .data$ci_ee_lo, xmax = .data$ci_ee_hi,
                      y = .data$model),
         orientation = "y", width = 0.12, colour = p$ee, linewidth = 0.7
       ) +
       ggplot2::geom_errorbar(
-        ggplot2::aes(xmin = .data$ci_ec - .data$sd_ec,
-                     xmax = .data$ci_ec + .data$sd_ec,
+        ggplot2::aes(xmin = .data$ci_ec_lo, xmax = .data$ci_ec_hi,
                      y = .data$model),
         orientation = "y", width = 0.12, colour = p$ec, linewidth = 0.7
       )
   }
+
+  ci_txt <- if (has_ci && !is.null(conf_level) && is.finite(conf_level)) {
+    sprintf("error bars: %s%% CI", format(100 * conf_level, trim = TRUE))
+  } else {
+    NULL
+  }
+  subtitle <- paste(
+    c(paste0("Weighting: ", weighting), ci_txt,
+      "dashed line marks chance (0.50)"),
+    collapse = " \u00b7 "
+  )
 
   gg +
     ggplot2::geom_point(
@@ -65,8 +82,7 @@ dumbbell_plot <- function(tab, weighting, dark) {
     ggplot2::labs(
       x = "Concordance index", y = NULL,
       title = "C-index decomposition",
-      subtitle = paste0("Weighting: ", weighting,
-                        " \u00b7 dashed line marks chance (0.50)")
+      subtitle = subtitle
     ) +
     theme_cindex(dark = dark)
 }
@@ -74,27 +90,25 @@ dumbbell_plot <- function(tab, weighting, dark) {
 #' @rdname autoplot.cindexdecomp
 #' @export
 autoplot.cindex_comparison <- function(object, dark = FALSE, ...) {
-  dumbbell_plot(object$table, object$weighting, dark)
+  dumbbell_plot(object$table, object$weighting, dark,
+               conf_level = object$conf_level)
 }
 
 #' @rdname autoplot.cindexdecomp
 #' @export
 autoplot.cindex_decomp <- function(object, dark = FALSE, ...) {
-  sd_of <- function(col) {
-    if (is.null(object$boot)) NA_real_ else stats::sd(object$boot[, col],
-                                                      na.rm = TRUE)
-  }
+  ee_ci <- boot_percentile(object$boot, "C_ee", object$conf_level)
+  ec_ci <- boot_percentile(object$boot, "C_ec", object$conf_level)
   tab <- data.frame(
     model = "model",
     ci_ee = object$C_ee,
     ci_ec = object$C_ec,
     global_c = object$C_global,
-    sd_ee = sd_of("C_ee"),
-    sd_ec = sd_of("C_ec"),
-    sd_global = sd_of("C_global"),
+    ci_ee_lo = ee_ci[1], ci_ee_hi = ee_ci[2],
+    ci_ec_lo = ec_ci[1], ci_ec_hi = ec_ci[2],
     stringsAsFactors = FALSE
   )
-  dumbbell_plot(tab, object$weighting, dark)
+  dumbbell_plot(tab, object$weighting, dark, conf_level = object$conf_level)
 }
 
 #' @rdname autoplot.cindexdecomp
@@ -150,7 +164,7 @@ autoplot.cindex_curve <- function(object, dark = FALSE, ...) {
       x = "Cohort censoring rate", y = "Concordance index",
       title = "Concordance under increasing censoring",
       subtitle = paste0("Weighting: ", object$weighting,
-                        " \u00b7 shaded band is the masking gap")
+                        " \u00b7 shaded band spans C_ee to the global C-index")
     ) +
     theme_cindex(dark = dark)
 }
