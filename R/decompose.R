@@ -91,6 +91,7 @@ decompose_cindex.default <- function(x, status, risk,
   } else {
     NULL
   }
+  n_boot_valid <- if (is.null(boot)) NA_integer_ else attr(boot, "n_valid")
 
   structure(
     list(
@@ -109,6 +110,7 @@ decompose_cindex.default <- function(x, status, risk,
       higher_is_riskier = higher_is_riskier,
       boot = boot,
       n_boot = n_boot,
+      n_boot_valid = n_boot_valid,
       conf_level = conf_level
     ),
     class = "cindex_decomp"

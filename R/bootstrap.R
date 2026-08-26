@@ -13,7 +13,8 @@
 #' @param n_boot Number of replicates.
 #' @return A numeric matrix, `n_boot` rows, columns `C_ee`, `C_ec`,
 #'   `C_global`, `gap`. Replicates that yield no comparable pairs of one
-#'   kind are left as `NA`.
+#'   kind are left as `NA`. The count of usable (complete) replicates is
+#'   attached as the `"n_valid"` attribute.
 #' @keywords internal
 #' @noRd
 bootstrap_decomp <- function(time, status, risk, weights, n_boot) {
@@ -33,6 +34,7 @@ bootstrap_decomp <- function(time, status, risk, weights, n_boot) {
     ec <- pc$S_ec / pc$W_ec
     out[b, ] <- c(ee, ec, (pc$S_ee + pc$S_ec) / (pc$W_ee + pc$W_ec), ec - ee)
   }
+  attr(out, "n_valid") <- sum(stats::complete.cases(out))
   out
 }
 
@@ -65,6 +67,16 @@ confint.cindex_decomp <- function(object,
   if (is.null(level)) level <- object$conf_level
   parm <- match.arg(parm, c("C_ee", "C_ec", "C_global", "gap"),
                     several.ok = TRUE)
+  n_valid <- sum(stats::complete.cases(object$boot))
+  if (n_valid < 0.9 * nrow(object$boot)) {
+    warning(
+      sprintf(
+        "Only %d of %d bootstrap replicates were usable (%.0f%%). Intervals are based on the usable ones; with few events, consider raising n_boot.",
+        n_valid, nrow(object$boot), 100 * n_valid / nrow(object$boot)
+      ),
+      call. = FALSE
+    )
+  }
   a <- (1 - level) / 2
   probs <- c(a, 1 - a)
   out <- t(vapply(
