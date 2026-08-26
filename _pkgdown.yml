@@ -1,0 +1,21 @@
+url: https://Lainsm.github.io/cindexdecomp/
+
+template:
+  bootstrap: 5
+
+reference:
+  - title: Decomposition
+    contents:
+      - decompose_cindex
+      - confint.cindex_decomp
+  - title: Weightings
+    contents:
+      - cindex_weights
+  - title: Censoring and comparison
+    contents:
+      - censoring_curve
+      - compare_decompositions
+  - title: Plotting
+    contents:
+      - autoplot.cindexdecomp
+      - theme_cindex

@@ -6,7 +6,7 @@ fmt_level <- function(p) paste0(format(100 * p, trim = TRUE), "%")
 #' @rdname decompose_cindex
 #' @export
 print.cindex_decomp <- function(x, ...) {
-  ci <- if (!is.null(x$boot)) confint(x) else NULL
+  ci <- if (!is.null(x$boot)) stats::confint(x) else NULL
   total_n <- x$N_ee + x$N_ec
 
   cat("C-Index Decomposition\n")

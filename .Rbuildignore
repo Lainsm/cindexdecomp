@@ -1,8 +1,11 @@
 ^cindexdecomp\.Rproj$
 ^\.Rproj\.user$
+^\.claude$
+^\.superpowers$
 ^docs/superpowers$
 ^\.github$
 ^_pkgdown\.yml$
 ^pkgdown$
 ^doc$
 ^Meta$
+^LICENSE\.md$

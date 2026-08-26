@@ -66,7 +66,7 @@ dumbbell_plot <- function(tab, weighting, dark) {
       x = "Concordance index", y = NULL,
       title = "C-index decomposition",
       subtitle = paste0("Weighting: ", weighting,
-                        " · dashed line marks chance (0.50)")
+                        " \u00b7 dashed line marks chance (0.50)")
     ) +
     theme_cindex(dark = dark)
 }
@@ -150,7 +150,7 @@ autoplot.cindex_curve <- function(object, dark = FALSE, ...) {
       x = "Cohort censoring rate", y = "Concordance index",
       title = "Concordance under increasing censoring",
       subtitle = paste0("Weighting: ", object$weighting,
-                        " · shaded band is the masking gap")
+                        " \u00b7 shaded band is the masking gap")
     ) +
     theme_cindex(dark = dark)
 }
