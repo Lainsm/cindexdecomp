@@ -14,6 +14,8 @@ decompose_cindex(x, ...)
   risk,
   weights = weights_harrell(),
   higher_is_riskier = TRUE,
+  n_boot = 0,
+  conf_level = 0.95,
   ...
 )
 
@@ -22,6 +24,8 @@ decompose_cindex(x, ...)
   data = parent.frame(),
   weights = weights_harrell(),
   higher_is_riskier = TRUE,
+  n_boot = 0,
+  conf_level = 0.95,
   ...
 )
 }
@@ -44,6 +48,13 @@ formula of the form \code{Surv(time, status) ~ risk} (formula method).}
 before any pair counting, so every component stays mutually
 consistent. Values below 0.5 are reported as they are: a
 worse-than-chance model is a finding, not an error.}
+
+\item{n_boot}{Number of bootstrap replicates. \code{0} (default) skips
+resampling, in which case \code{\link[=confint]{confint()}} is unavailable. Replicates
+resample subjects, not pairs.}
+
+\item{conf_level}{Confidence level stored on the object and used as the
+default for \code{\link[=confint]{confint()}}.}
 
 \item{data}{A data frame in which to evaluate the formula. Formula
 method only.}

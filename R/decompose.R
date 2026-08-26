@@ -27,6 +27,11 @@
 #'   before any pair counting, so every component stays mutually
 #'   consistent. Values below 0.5 are reported as they are: a
 #'   worse-than-chance model is a finding, not an error.
+#' @param n_boot Number of bootstrap replicates. `0` (default) skips
+#'   resampling, in which case [confint()] is unavailable. Replicates
+#'   resample subjects, not pairs.
+#' @param conf_level Confidence level stored on the object and used as the
+#'   default for [confint()].
 #' @param ... Passed between methods.
 #'
 #' @return An object of class `cindex_decomp`.
@@ -49,7 +54,8 @@ decompose_cindex <- function(x, ...) {
 #' @export
 decompose_cindex.default <- function(x, status, risk,
                                      weights = weights_harrell(),
-                                     higher_is_riskier = TRUE, ...) {
+                                     higher_is_riskier = TRUE,
+                                     n_boot = 0, conf_level = 0.95, ...) {
   time <- x
   validate_survival_inputs(time, status, risk)
   if (!inherits(weights, "cindex_weights")) {
@@ -59,6 +65,15 @@ decompose_cindex.default <- function(x, status, risk,
   if (!is.logical(higher_is_riskier) || length(higher_is_riskier) != 1L) {
     stop("`higher_is_riskier` must be TRUE or FALSE.", call. = FALSE)
   }
+  if (!is.numeric(n_boot) || length(n_boot) != 1L || n_boot < 0) {
+    stop("`n_boot` must be a single non-negative number.", call. = FALSE)
+  }
+  if (!is.numeric(conf_level) || length(conf_level) != 1L ||
+      conf_level <= 0 || conf_level >= 1) {
+    stop("`conf_level` must be a single number strictly between 0 and 1.",
+         call. = FALSE)
+  }
+  n_boot <- as.integer(n_boot)
 
   # Orientation is applied once, before any counting, so C_ee, C_ec and
   # C_global stay mutually consistent and the identity survives.
@@ -70,6 +85,12 @@ decompose_cindex.default <- function(x, status, risk,
   C_ec <- if (pc$W_ec > 0) pc$S_ec / pc$W_ec else NA_real_
   total_w <- pc$W_ee + pc$W_ec
   C_global <- if (total_w > 0) (pc$S_ee + pc$S_ec) / total_w else NA_real_
+
+  boot <- if (n_boot > 0L) {
+    bootstrap_decomp(time, status, risk, weights, n_boot)
+  } else {
+    NULL
+  }
 
   structure(
     list(
@@ -86,7 +107,9 @@ decompose_cindex.default <- function(x, status, risk,
       censoring_rate = mean(status == 0),
       weighting = weights$name,
       higher_is_riskier = higher_is_riskier,
-      boot = NULL
+      boot = boot,
+      n_boot = n_boot,
+      conf_level = conf_level
     ),
     class = "cindex_decomp"
   )
@@ -96,7 +119,8 @@ decompose_cindex.default <- function(x, status, risk,
 #' @export
 decompose_cindex.formula <- function(x, data = parent.frame(),
                                      weights = weights_harrell(),
-                                     higher_is_riskier = TRUE, ...) {
+                                     higher_is_riskier = TRUE,
+                                     n_boot = 0, conf_level = 0.95, ...) {
   mf <- stats::model.frame(x, data = data)
   resp <- stats::model.response(mf)
   if (!inherits(resp, "Surv")) {
@@ -113,6 +137,8 @@ decompose_cindex.formula <- function(x, data = parent.frame(),
     risk = as.numeric(mf[[2L]]),
     weights = weights,
     higher_is_riskier = higher_is_riskier,
+    n_boot = n_boot,
+    conf_level = conf_level,
     ...
   )
 }
