@@ -1,0 +1,252 @@
+---
+title: "Decomposing the C-index"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Decomposing the C-index}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>",
+                      fig.width = 7, fig.height = 4.5)
+```
+
+```{r setup}
+library(cindexdecomp)
+library(survival)
+```
+
+## The problem
+
+Harrell's concordance index pools two different ranking tasks. Some
+comparable pairs consist of two subjects who both had the event; others
+pair an event with a subject censored later. The second task is easier,
+and as censoring rises it comes to dominate the pooled score: a model can
+report a stable, respectable global C-index while doing no better than
+chance at ordering the events it was built to predict.
+
+## The decomposition
+
+Write any concordance index as a weighted average over comparable pairs,
+
+$$C_w = \frac{\sum_{ij} w_{ij} c_{ij}}{\sum_{ij} w_{ij}},$$
+
+where $c_{ij} \in \{0, 0.5, 1\}$ records whether the pair was ranked
+correctly. Splitting the pairs by the status of the later subject gives
+
+$$C_w = \frac{W_{ee} C_{ee} + W_{ec} C_{ec}}{W_{ee} + W_{ec}},$$
+
+with $W$ denoting sums of weights. The identity holds exactly for every
+weighting -- it is an algebraic regrouping of the same sum, not an
+approximation.
+
+```{r}
+set.seed(7)
+n <- 400
+risk <- rnorm(n)
+event_time <- rexp(n, rate = exp(0.8 * risk) * 0.1)
+cens_time <- rexp(n, rate = 0.08)
+time <- pmin(event_time, cens_time)
+status <- as.numeric(event_time <= cens_time)
+
+fit <- decompose_cindex(time, status, risk, n_boot = 200)
+fit
+```
+
+The global figure agrees with `survival::concordance()` exactly:
+
+```{r}
+c(cindexdecomp = fit$C_global,
+  survival = concordance(Surv(time, status) ~ risk, reverse = TRUE)$concordance)
+```
+
+## Ties
+
+Three cases arise, and the package follows `survival::concordance()` in
+each:
+
+* two events at the same recorded time are **not** comparable;
+* an event and a censoring at the same recorded time **are** comparable,
+  with the event treated as occurring first;
+* equal risk scores receive half credit.
+
+The second case matters in practice because survival times are usually
+recorded in whole days, so exact ties are common rather than exceptional.
+
+## Choosing a weighting
+
+The weighting selects the estimator. One engine produces all of them.
+
+```{r}
+weightings <- list(
+  Harrell   = weights_harrell(),
+  Uno       = weights_uno(),
+  Truncated = weights_truncated(tau = quantile(time[status == 1], 0.5))
+)
+
+do.call(rbind, lapply(names(weightings), function(nm) {
+  f <- decompose_cindex(time, status, risk, weights = weightings[[nm]])
+  data.frame(weighting = nm, C_global = f$C_global,
+             C_ee = f$C_ee, C_ec = f$C_ec)
+}))
+```
+
+`C_global` varies with the estimator chosen, and every one of those values
+is defensible. `C_ee` does not: it stays close to the same figure
+throughout, well below `C_ec` in every row. Uno's inverse-probability
+weighting corrects the bias in the pooled estimate; it does not reveal the
+composition problem underneath. The masking is a property of the data, not
+of the estimator.
+
+A user-supplied weighting needs no changes to the package:
+
+```{r}
+own <- weights_custom(function(t, G) 1 / G(t), name = "IPCW (power 1)")
+decompose_cindex(time, status, risk, weights = own)$C_global
+```
+
+### Uno's C under tied event times
+
+`cindexdecomp` implements Uno's estimator in its published **pairwise**
+form: every comparable pair is weighted by $1/\hat{G}(T_i)^2$.
+`survival::concordance(timewt = "n/G2")` uses a counting-process
+formulation that applies its weight per event *time* instead. The two
+agree exactly when event times are distinct, and diverge slightly once
+times are tied:
+
+```{r}
+tie_agreement <- function(time, status, risk) {
+  ref_h <- concordance(Surv(time, status) ~ risk, reverse = TRUE)$concordance
+  ref_u <- concordance(Surv(time, status) ~ risk, reverse = TRUE,
+                       timewt = "n/G2")$concordance
+  fit_h <- decompose_cindex(time, status, risk, weights = weights_harrell())
+  fit_u <- decompose_cindex(time, status, risk, weights = weights_uno())
+  c(harrell = fit_h$C_global - ref_h, uno = fit_u$C_global - ref_u)
+}
+
+# Day-scale rounding mimics how survival time is actually recorded (whole
+# days), which is what makes exact ties common rather than exceptional.
+time_days <- round(time * 30) + 1
+lung2 <- lung[complete.cases(lung), ]
+
+tie_raw <- rbind(
+  `Continuous times`   = tie_agreement(time, status, risk),
+  `Day-scale, rounded` = tie_agreement(time_days, status, risk),
+  `survival::lung`     = tie_agreement(lung2$time, lung2$status - 1, lung2$age)
+)
+
+tie_tab <- data.frame(
+  Data = rownames(tie_raw),
+  `Harrell agreement` = formatC(tie_raw[, "harrell"], format = "e", digits = 2),
+  `Uno agreement`     = formatC(tie_raw[, "uno"],     format = "e", digits = 2),
+  check.names = FALSE, row.names = NULL
+)
+knitr::kable(tie_tab, align = c("l", "r", "r"))
+```
+
+The largest deviation observed here (`r formatC(max(abs(tie_raw[, "uno"])), format = "e", digits = 2)`,
+in the `survival::lung` row) is roughly two orders of magnitude below the
+sampling variability of a global estimate on data of this size -- the
+bootstrap standard deviation of `C_global` for the fit above is
+`r formatC(sd(fit$boot[, "C_global"]), format = "e", digits = 2)`. It does
+not affect any practical conclusion. It is documented because a user
+cross-checking against `survival` on tied data would otherwise reasonably
+suspect a bug.
+
+The Harrell column is zero to floating-point precision throughout: exactly
+`0` for continuous times and for `survival::lung`, and a single unit of
+rounding error (`r formatC(tie_raw["Day-scale, rounded", "harrell"], format = "e", digits = 2)`,
+i.e. one bit) once times are tied and rounded to whole days. That is
+agreement to the limit of double-precision arithmetic, not an
+approximation.
+
+Per-pair weighting is a requirement here rather than a preference: a
+weight attached to an event *time* cannot be partitioned into
+event-event and event-censored pair sets, so the decomposition this
+package computes could not be defined under the counting-process
+formulation. Harrell's weighting is unaffected and matches
+`survival::concordance()` exactly under every tie pattern.
+
+## Inference
+
+Intervals come from resampling **subjects**, not pairs. `r n` subjects
+generate `r format(fit$N_ee + fit$N_ec, big.mark = ",")` comparable pairs,
+but the information content is `r n` observations: resampling pairs
+directly gives intervals several times too narrow.
+
+```{r}
+confint(fit)
+```
+
+The final row is usually the one of interest. It is computed inside each
+replicate, so the correlation between `C_ee` and `C_ec` is carried through
+rather than assumed away.
+
+## Censoring curves
+
+`censoring_curve()` applies a series of administrative cut-offs to the
+**whole cohort** and recomputes at each. The reported rate is therefore the
+cohort's actual censoring rate, including subjects censored before any
+cut-off was applied.
+
+```{r}
+cv <- censoring_curve(time, status, risk, n_thresholds = 12)
+head(as.data.frame(cv))
+```
+
+```{r}
+autoplot(cv)
+```
+
+Estimates resting on few event-event pairs are flagged in
+`low_precision` and drawn faintly. They are never removed, and no value is
+discarded for being small: `r sum(as.data.frame(cv)$low_precision)` of the
+`r nrow(as.data.frame(cv))` thresholds above are flagged, all at the
+high-censoring end of the sweep where the flag is meant to bite.
+
+## Comparing models
+
+```{r}
+risks <- list(
+  full = risk,
+  noisy = risk + rnorm(n, sd = 1.5)
+)
+cmp <- compare_decompositions(risks, time, status, n_boot = 200)
+cmp
+```
+
+```{r}
+autoplot(cmp)
+```
+
+Adding noise to the risk score shrinks `C_ee`, `C_ec` and the gap between
+them together -- a reminder that the gap is a property of a specific
+model's failure mode on this cohort, not a universal constant to be
+compared across unrelated studies.
+
+## A worked example
+
+```{r}
+cox <- coxph(Surv(time, status - 1) ~ age + sex + ph.ecog, data = lung2)
+decompose_cindex(
+  Surv(time, status - 1) ~ predict(cox, type = "lp"),
+  data = lung2,
+  n_boot = 200
+)
+```
+
+Note the `status - 1`: `lung` codes status as
+`r paste(sort(unique(lung$status)), collapse = "/")`, while the package
+expects 0/1. Data already coded 0/1 needs no adjustment.
+
+## Scope
+
+The decomposition applies to any estimator that averages over observed
+comparable pairs. Model-based estimators such as Gonen-Heller integrate
+over an assumed model rather than counting pairs, so the event-event and
+event-censored partition is undefined for them; they are outside the scope
+of this package by construction.
+
+Non-informative censoring is assumed throughout. The package evaluates
+discrimination only, not calibration.
