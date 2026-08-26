@@ -109,11 +109,12 @@ decompose_cindex(time, status, risk, weights = own)$C_global
 ### Uno's C under tied event times
 
 `cindexdecomp` implements Uno's estimator in its published **pairwise**
-form: every comparable pair is weighted by $1/\hat{G}(T_i)^2$.
+form: every comparable pair is weighted by $1/\hat{G}(T_i)^2$, where
+$\hat G$ is the Kaplan-Meier estimate of the censoring distribution.
 `survival::concordance(timewt = "n/G2")` uses a counting-process
 formulation that applies its weight per event *time* instead. The two
-agree exactly when event times are distinct, and diverge slightly once
-times are tied:
+agree to the limit of double-precision arithmetic when event times are
+distinct, and diverge materially once times are tied:
 
 ```{r}
 tie_agreement <- function(time, status, risk) {
@@ -243,7 +244,7 @@ expects 0/1. Data already coded 0/1 needs no adjustment.
 ## Scope
 
 The decomposition applies to any estimator that averages over observed
-comparable pairs. Model-based estimators such as Gonen-Heller integrate
+comparable pairs. Model-based estimators such as Gönen–Heller integrate
 over an assumed model rather than counting pairs, so the event-event and
 event-censored partition is undefined for them; they are outside the scope
 of this package by construction.
