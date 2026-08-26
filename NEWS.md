@@ -2,11 +2,21 @@
 
 ## Breaking changes
 
-* `simulate_censoring()` is renamed `censoring_curve()`.
-* `plot_simulation()` and `plot_decomposition()` are replaced by
-  `autoplot()` methods.
+* The first argument of `decompose_cindex()` is now `x` rather than
+  `time`, as required for S3 dispatch. Calls written as
+  `decompose_cindex(time = t, status = s, risk = r)` will fail with
+  `argument "x" is missing`; call positionally, or use the formula
+  method.
 * `decompose_cindex()` returns a `cindex_decomp` object rather than a
   plain list. Existing element access (`$CI_ee`) becomes `$C_ee`.
+* `simulate_censoring()` is renamed `censoring_curve()` and now returns
+  a `cindex_curve` object, not a plain data frame. Results are in
+  `$data` (or via `as.data.frame()`), with columns renamed:
+  `ci_ee`/`ci_ec`/`global_c` become `C_ee`/`C_ec`/`C_global`,
+  `n_ee`/`n_ec` become `N_ee`/`N_ec`, and `gap` and `low_precision` are
+  new.
+* `plot_simulation()` and `plot_decomposition()` are replaced by
+  `autoplot()` methods.
 
 ## Bug fixes
 
@@ -24,8 +34,9 @@
   as 0.58 and breaking the decomposition identity. Orientation is now
   declared once via `higher_is_riskier`.
 * `C_ec` values below 0.50 were silently set to `NA`. Estimates are no
-  longer discarded because of their magnitude; `min_pairs` sets a
-  `low_precision` flag instead.
+  longer discarded because of their magnitude; `censoring_curve()`'s
+  `min_pairs` argument flags rows as `low_precision` instead of deleting
+  them (`decompose_cindex()` has no equivalent threshold).
 * Plots no longer request the "Arial" font family, which is absent on many
   Linux systems, and no longer impose fixed axis limits that hid
   worse-than-chance models.

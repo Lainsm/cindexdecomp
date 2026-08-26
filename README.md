@@ -68,7 +68,11 @@ where `W` denotes sums of weights. Setting `w_ij = 1` recovers Harrell's C.
 | `weights_custom(fn, name)` | any user-supplied rule |
 
 The pooled result agrees with `survival::concordance()` to machine
-precision for Harrell's and Uno's weightings.
+precision for Harrell's weighting under every tie pattern, and for Uno's
+weighting when event times are distinct. Under tied times, Uno's
+pairwise estimator diverges from `survival`'s counting-process form by
+around 1e-04 -- immaterial in practice, and explained in the vignette
+(`vignette("cindexdecomp")`).
 
 ## Functions
 
