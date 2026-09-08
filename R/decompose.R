@@ -69,13 +69,7 @@ decompose_cindex.default <- function(x, status, risk,
   }
   time <- x
   validate_survival_inputs(time, status, risk)
-  if (!inherits(weights, "cindex_weights")) {
-    stop("`weights` must be a `cindex_weights` object, e.g. weights_harrell().",
-         call. = FALSE)
-  }
-  if (!is.logical(higher_is_riskier) || length(higher_is_riskier) != 1L) {
-    stop("`higher_is_riskier` must be TRUE or FALSE.", call. = FALSE)
-  }
+  validate_weights_and_orientation(weights, higher_is_riskier)
   if (!is.numeric(n_boot) || length(n_boot) != 1L || n_boot < 0) {
     stop("`n_boot` must be a single non-negative number.", call. = FALSE)
   }
@@ -91,11 +85,10 @@ decompose_cindex.default <- function(x, status, risk,
   if (!higher_is_riskier) risk <- -risk
 
   pc <- pair_counts(time, status, risk, weights)
-
-  C_ee <- if (pc$W_ee > 0) pc$S_ee / pc$W_ee else NA_real_
-  C_ec <- if (pc$W_ec > 0) pc$S_ec / pc$W_ec else NA_real_
-  total_w <- pc$W_ee + pc$W_ec
-  C_global <- if (total_w > 0) (pc$S_ee + pc$S_ec) / total_w else NA_real_
+  dec <- decomp_from_pairs(pc)
+  C_ee <- dec$C_ee
+  C_ec <- dec$C_ec
+  C_global <- dec$C_global
 
   boot <- if (n_boot > 0L) {
     bootstrap_decomp(time, status, risk, weights, n_boot)

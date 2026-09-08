@@ -153,6 +153,39 @@ test_that("a non-finite weight is an error", {
   )
 })
 
+test_that("decomp_from_pairs computes C_ee/C_ec/C_global independently", {
+  d <- make_test_data(200, seed = 15)
+  pc <- pair_counts(d$time, d$status, d$risk, weights_harrell())
+  dec <- decomp_from_pairs(pc)
+  expect_equal(dec$C_ee, pc$S_ee / pc$W_ee, tolerance = 1e-12)
+  expect_equal(dec$C_ec, pc$S_ec / pc$W_ec, tolerance = 1e-12)
+  expect_equal(dec$C_global, (pc$S_ee + pc$S_ec) / (pc$W_ee + pc$W_ec),
+               tolerance = 1e-12)
+  expect_equal(dec$gap, dec$C_ec - dec$C_ee, tolerance = 1e-12)
+})
+
+test_that("decomp_from_pairs NAs only the empty side, not the whole result", {
+  # Regression guard for the bootstrap discard bug: when only ONE side has
+  # zero weight, that side's C_* is NA_real_, but the other side and
+  # C_global (which reduces to the non-empty side alone) must stay usable.
+  pc_no_ec <- list(W_ee = 10, S_ee = 7, N_ee = 10, W_ec = 0, S_ec = 0, N_ec = 0)
+  dec <- decomp_from_pairs(pc_no_ec)
+  expect_equal(dec$C_ee, 0.7, tolerance = 1e-12)
+  expect_true(is.na(dec$C_ec))
+  expect_equal(dec$C_global, 0.7, tolerance = 1e-12)  # reduces to C_ee alone
+  expect_true(is.na(dec$gap))
+
+  pc_no_ee <- list(W_ee = 0, S_ee = 0, N_ee = 0, W_ec = 10, S_ec = 4, N_ec = 10)
+  dec2 <- decomp_from_pairs(pc_no_ee)
+  expect_true(is.na(dec2$C_ee))
+  expect_equal(dec2$C_ec, 0.4, tolerance = 1e-12)
+  expect_equal(dec2$C_global, 0.4, tolerance = 1e-12)
+
+  pc_neither <- list(W_ee = 0, S_ee = 0, N_ee = 0, W_ec = 0, S_ec = 0, N_ec = 0)
+  dec3 <- decomp_from_pairs(pc_neither)
+  expect_true(all(vapply(dec3, is.na, logical(1))))
+})
+
 test_that("N_ee and N_ec count only contributing (non-zero-weight) pairs", {
   d <- make_test_data(200, seed = 13)
   tau <- stats::quantile(d$time[d$status == 1], 0.5, names = FALSE)

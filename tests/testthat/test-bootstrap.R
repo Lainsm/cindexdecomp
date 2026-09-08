@@ -126,6 +126,19 @@ test_that("confint does not warn on a healthy fixture", {
   expect_no_warning(confint(r))
 })
 
+test_that("bootstrap_decomp keeps a usable C_ee when only C_ec's side is empty", {
+  # Regression: bootstrap_decomp() used to discard the ENTIRE replicate (all
+  # four columns NA'd together) whenever EITHER side had zero weight, even
+  # though the point estimate computes C_ee and C_ec independently. Few
+  # subjects and LOW censoring makes it common for a resample to miss the
+  # handful of censored subjects entirely, giving W_ec == 0 while W_ee > 0.
+  d <- make_test_data(10, censor_rate = 0.15, seed = 4)
+  set.seed(1)
+  b <- bootstrap_decomp(d$time, d$status, d$risk, weights_harrell(), n_boot = 300)
+  n_ee_only <- sum(!is.na(b[, "C_ee"]) & is.na(b[, "C_ec"]))
+  expect_gt(n_ee_only, 0)
+})
+
 test_that("confint computes bounds via the shared boot_percentile helper", {
   # Regression guard for Ruling R12: confint.cindex_decomp() used to
   # hand-duplicate the quantile formula instead of calling boot_percentile(),

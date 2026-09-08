@@ -23,8 +23,13 @@ dumbbell_plot <- function(tab, weighting, dark, conf_level = NULL) {
   p <- cindex_palette(dark)
   tab$model <- factor(tab$model, levels = rev(unique(tab$model)))
   ci_cols <- c("ci_ee_lo", "ci_ee_hi", "ci_ec_lo", "ci_ec_hi")
-  has_ci <- all(ci_cols %in% names(tab)) &&
-    all(vapply(tab[ci_cols], function(col) all(is.finite(col)), logical(1)))
+  has_ci_cols <- all(ci_cols %in% names(tab))
+  # A model with an unstable (NA) bootstrap CI must not suppress the error
+  # bars for every OTHER model in the table -- each row's bars are dropped
+  # independently below (na.rm = TRUE), this only gates whether the layer
+  # and subtitle claim are added at all.
+  has_ci <- has_ci_cols &&
+    any(vapply(tab[ci_cols], function(col) any(is.finite(col)), logical(1)))
 
   gg <- ggplot2::ggplot(tab) +
     ggplot2::geom_vline(xintercept = 0.5, linetype = "dashed",
@@ -36,13 +41,23 @@ dumbbell_plot <- function(tab, weighting, dark, conf_level = NULL) {
     )
 
   if (has_ci) {
+    # geom_errorbar's own na.rm doesn't drop rows here -- with
+    # orientation = "y" its missing-value check looks at the wrong
+    # (pre-flip) aesthetic names, so a row with an NA bound would draw a
+    # zero-width bar at its own position instead of being dropped. Filter
+    # each side's data explicitly so one model's unstable CI doesn't leave
+    # a stray marker next to the others'.
+    ee_tab <- tab[is.finite(tab$ci_ee_lo) & is.finite(tab$ci_ee_hi), , drop = FALSE]
+    ec_tab <- tab[is.finite(tab$ci_ec_lo) & is.finite(tab$ci_ec_hi), , drop = FALSE]
     gg <- gg +
       ggplot2::geom_errorbar(
+        data = ee_tab,
         ggplot2::aes(xmin = .data$ci_ee_lo, xmax = .data$ci_ee_hi,
                      y = .data$model),
         orientation = "y", width = 0.12, colour = p$ee, linewidth = 0.7
       ) +
       ggplot2::geom_errorbar(
+        data = ec_tab,
         ggplot2::aes(xmin = .data$ci_ec_lo, xmax = .data$ci_ec_hi,
                      y = .data$model),
         orientation = "y", width = 0.12, colour = p$ec, linewidth = 0.7
@@ -120,7 +135,11 @@ autoplot.cindex_curve <- function(object, dark = FALSE, ...) {
 
   ggplot2::ggplot(dat, ggplot2::aes(x = .data$censoring)) +
     ggplot2::geom_ribbon(
-      ggplot2::aes(ymin = .data$C_ee, ymax = .data$C_global),
+      # C_global is a weighted average of C_ee and C_ec, so a negative gap
+      # (C_ec < C_ee) makes C_global < C_ee -- pmin/pmax keep the ribbon
+      # from drawing inverted in that case.
+      ggplot2::aes(ymin = pmin(.data$C_ee, .data$C_global),
+                   ymax = pmax(.data$C_ee, .data$C_global)),
       fill = p$ee, alpha = 0.10, na.rm = TRUE
     ) +
     ggplot2::geom_hline(yintercept = 0.5, linetype = "dashed",

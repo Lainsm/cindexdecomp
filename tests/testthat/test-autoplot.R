@@ -124,6 +124,53 @@ test_that("the dumbbell plot omits error bars, and any CI claim, when n_boot = 0
   expect_false(any(errorbar_layers))
 })
 
+test_that("the dumbbell plot draws error bars per-model, not all-or-nothing", {
+  # Regression: has_ci was `all(is.finite(...))` across every row of the
+  # comparison table, so one model with an unstable (NA) bootstrap CI
+  # suppressed error bars for EVERY model, not just the affected one.
+  skip_if_no_ggplot()
+  tab <- data.frame(
+    model = c("stable", "unstable"),
+    ci_ee = c(0.60, 0.55), ci_ec = c(0.70, 0.50), global_c = c(0.65, 0.52),
+    ci_ee_lo = c(0.55, NA), ci_ee_hi = c(0.65, NA),
+    ci_ec_lo = c(0.65, NA), ci_ec_hi = c(0.75, NA),
+    stringsAsFactors = FALSE
+  )
+  p <- dumbbell_plot(tab, "Harrell", dark = FALSE, conf_level = 0.95)
+  built <- ggplot2::ggplot_build(p)
+  is_errorbar <- vapply(p$layers, function(l) inherits(l$geom, "GeomErrorbar"),
+                        logical(1))
+  expect_true(any(is_errorbar))
+  for (dd in built$data[is_errorbar]) expect_equal(nrow(dd), 1)
+  expect_true(grepl("CI", p$labels$subtitle, fixed = TRUE))
+})
+
+test_that("the curve plot's ribbon never inverts when the gap is negative", {
+  # Regression: geom_ribbon(ymin = C_ee, ymax = C_global) assumed
+  # C_ee <= C_global, but C_global is a weighted average of C_ee and C_ec,
+  # so a threshold with a negative gap (C_ec < C_ee) makes C_global < C_ee
+  # and the ribbon draw inverted.
+  skip_if_no_ggplot()
+  cv <- structure(
+    list(
+      data = data.frame(
+        threshold = c(10, 20), censoring = c(0.3, 0.6),
+        C_ee = c(0.70, 0.60), C_ec = c(0.65, 0.75),
+        C_global = c(0.68, 0.68),  # row 1: C_ee > C_global, negative gap
+        low_precision = c(FALSE, FALSE)
+      ),
+      weighting = "Harrell"
+    ),
+    class = "cindex_curve"
+  )
+  p <- ggplot2::autoplot(cv)
+  built <- ggplot2::ggplot_build(p)
+  is_ribbon <- vapply(p$layers, function(l) inherits(l$geom, "GeomRibbon"),
+                      logical(1))
+  ribbon_data <- built$data[[which(is_ribbon)]]
+  expect_true(all(ribbon_data$ymin <= ribbon_data$ymax))
+})
+
 test_that("the curve plot marks low-precision points without dropping them", {
   skip_if_no_ggplot()
   d <- make_test_data(250, seed = 7)

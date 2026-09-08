@@ -50,12 +50,7 @@ censoring_curve <- function(time, status, risk,
                             probs = seq(0.05, 0.70, length.out = n_thresholds),
                             min_pairs = NULL) {
   validate_survival_inputs(time, status, risk)
-  if (!inherits(weights, "cindex_weights")) {
-    stop("`weights` must be a `cindex_weights` object.", call. = FALSE)
-  }
-  if (!is.logical(higher_is_riskier) || length(higher_is_riskier) != 1L) {
-    stop("`higher_is_riskier` must be TRUE or FALSE.", call. = FALSE)
-  }
+  validate_weights_and_orientation(weights, higher_is_riskier)
   if (!higher_is_riskier) risk <- -risk
 
   event_idx <- which(status == 1)
@@ -76,17 +71,15 @@ censoring_curve <- function(time, status, risk,
     pc <- pair_counts(sim_time, sim_status, risk, weights)
     total_w <- pc$W_ee + pc$W_ec
     if (total_w <= 0) return(NULL)
-
-    C_ee <- if (pc$W_ee > 0) pc$S_ee / pc$W_ee else NA_real_
-    C_ec <- if (pc$W_ec > 0) pc$S_ec / pc$W_ec else NA_real_
+    dec <- decomp_from_pairs(pc)
 
     data.frame(
       threshold = tau,
       censoring = mean(sim_status == 0),
-      C_ee = C_ee,
-      C_ec = C_ec,
-      C_global = (pc$S_ee + pc$S_ec) / total_w,
-      gap = C_ec - C_ee,
+      C_ee = dec$C_ee,
+      C_ec = dec$C_ec,
+      C_global = dec$C_global,
+      gap = dec$gap,
       N_ee = pc$N_ee,
       N_ec = pc$N_ec,
       low_precision = pc$N_ee < min_pairs,

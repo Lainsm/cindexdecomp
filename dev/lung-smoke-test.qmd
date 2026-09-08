@@ -1,0 +1,164 @@
+---
+title: "cindexdecomp — full API walkthrough on survival::lung"
+format:
+  html:
+    embed-resources: true
+    toc: true
+    code-fold: false
+execute:
+  warning: true
+---
+
+Exploratory notebook exercising every exported function of `cindexdecomp`
+against `survival::lung`. Not a package vignette — lives in `dev/`, ignored
+by `R CMD build` (see `.Rbuildignore`).
+
+```{r setup}
+devtools::load_all(here::here())
+library(survival)
+set.seed(1)
+```
+
+## The data
+
+`lung$status` is coded 1 = censored, 2 = dead; `cindexdecomp` wants
+0/1 with 1 = event.
+
+```{r data}
+lung2 <- lung
+lung2$event <- lung2$status - 1L
+# age, ph.ecog have missing values; keep only complete cases for the
+# risk scores used below.
+lung2 <- lung2[stats::complete.cases(lung2[, c("time", "event", "age", "ph.ecog", "sex")]), ]
+nrow(lung2)
+table(lung2$event)
+```
+
+Two risk scores to compare: age alone, and age + ECOG performance status
+(both "higher is riskier" on the natural scale, no need to negate).
+
+```{r risk-scores}
+risk_age   <- lung2$age
+risk_full  <- lung2$age + 10 * lung2$ph.ecog
+```
+
+## `weights_*()` constructors
+
+```{r weights}
+weights_harrell()
+weights_uno()
+weights_uno(tau = 300)
+weights_truncated(tau = 300)
+weights_custom(function(t, G) rep(1, length(t)), name = "UnitCustom")
+```
+
+## `decompose_cindex()` — default (vector) method
+
+```{r decompose-default}
+fit_harrell <- decompose_cindex(lung2$time, lung2$event, risk_full, n_boot = 300)
+fit_harrell
+```
+
+```{r decompose-uno}
+fit_uno <- decompose_cindex(
+  lung2$time, lung2$event, risk_full,
+  weights = weights_uno(), n_boot = 300
+)
+fit_uno
+```
+
+## `decompose_cindex()` — formula method
+
+```{r decompose-formula}
+fit_formula <- decompose_cindex(
+  Surv(time, event) ~ risk_full,
+  data = data.frame(lung2, risk_full = risk_full),
+  n_boot = 100
+)
+fit_formula
+```
+
+## `print()`, `summary()`, `as.data.frame()` on a `cindex_decomp`
+
+```{r methods-decomp}
+print(fit_harrell)
+summary(fit_harrell)
+as.data.frame(fit_harrell)
+```
+
+## `confint.cindex_decomp()`
+
+```{r confint}
+confint(fit_harrell)
+confint(fit_harrell, level = 0.80)
+confint(fit_harrell, parm = "gap")
+```
+
+## `censoring_curve()`
+
+```{r censoring-curve}
+curve <- censoring_curve(lung2$time, lung2$event, risk_full, n_thresholds = 8)
+curve
+as.data.frame(curve)
+```
+
+## `compare_decompositions()`
+
+Two risk scores on the same cohort, Harrell weighting.
+
+```{r compare}
+cmp <- compare_decompositions(
+  list(age_only = risk_age, age_ecog = risk_full),
+  lung2$time, lung2$event,
+  n_boot = 300
+)
+cmp
+as.data.frame(cmp)
+```
+
+A matrix of risk scores also works (Finding 8 of the final review).
+
+```{r compare-matrix}
+risk_mat <- cbind(age_only = risk_age, age_ecog = risk_full)
+compare_decompositions(risk_mat, lung2$time, lung2$event, n_boot = 0)
+```
+
+## `autoplot()` — all three plot methods
+
+```{r autoplot-decomp}
+autoplot(fit_harrell)
+```
+
+```{r autoplot-curve}
+autoplot(curve)
+```
+
+```{r autoplot-compare}
+autoplot(cmp)
+```
+
+## `theme_cindex()`
+
+```{r theme}
+autoplot(fit_harrell) + theme_cindex()
+```
+
+## Error handling / validation surface
+
+Each of these is expected to error, not silently misbehave — confirms the
+validation added across the redesign and the final review's fix wave.
+
+```{r errors}
+try(decompose_cindex(time = lung2$time, status = lung2$event, risk = risk_full))
+try(decompose_cindex(lung2$time, lung2$event, risk_full, higher_is_riskier = 0))
+try(confint(fit_harrell, level = -0.2))
+try(censoring_curve(lung2$time, lung2$event, risk_full, higher_is_riskier = "yes"))
+try(compare_decompositions(matrix(1:10, ncol = 2), lung2$time[1:5], lung2$event[1:5]))
+try(decompose_cindex(c(lung2$time, NA), c(lung2$event, 1), c(risk_full, 1)))
+```
+
+## Session info
+
+```{r session}
+sessionInfo()
+```

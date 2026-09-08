@@ -29,10 +29,9 @@ bootstrap_decomp <- function(time, status, risk, weights, n_boot) {
       pair_counts(time[k], status[k], risk[k], weights),
       error = function(e) NULL
     )
-    if (is.null(pc) || pc$W_ee <= 0 || pc$W_ec <= 0) next
-    ee <- pc$S_ee / pc$W_ee
-    ec <- pc$S_ec / pc$W_ec
-    out[b, ] <- c(ee, ec, (pc$S_ee + pc$S_ec) / (pc$W_ee + pc$W_ec), ec - ee)
+    if (is.null(pc)) next
+    dec <- decomp_from_pairs(pc)
+    out[b, ] <- c(dec$C_ee, dec$C_ec, dec$C_global, dec$gap)
   }
   attr(out, "n_valid") <- sum(stats::complete.cases(out))
   out

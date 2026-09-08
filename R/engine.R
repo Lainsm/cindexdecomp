@@ -66,3 +66,25 @@ pair_counts <- function(time, status, risk, weights) {
     W_ec = W_ec, S_ec = S_ec, N_ec = N_ec
   )
 }
+
+#' Derive C_ee, C_ec, C_global and the gap from a pair_counts() result
+#'
+#' Shared by [decompose_cindex()], [censoring_curve()] and
+#' `bootstrap_decomp()` so the three don't each carry their own copy of the
+#' zero-weight convention. Each quantity is NA'd independently: a side with
+#' no comparable pairs makes only that side's `C_*` unusable, not the other
+#' side or `C_global` (which reduces to the surviving side alone when one
+#' side is empty).
+#'
+#' @param pc A list with `W_ee`, `S_ee`, `W_ec`, `S_ec`, as returned by
+#'   `pair_counts()`.
+#' @return A list with `C_ee`, `C_ec`, `C_global`, `gap`.
+#' @keywords internal
+#' @noRd
+decomp_from_pairs <- function(pc) {
+  C_ee <- if (pc$W_ee > 0) pc$S_ee / pc$W_ee else NA_real_
+  C_ec <- if (pc$W_ec > 0) pc$S_ec / pc$W_ec else NA_real_
+  total_w <- pc$W_ee + pc$W_ec
+  C_global <- if (total_w > 0) (pc$S_ee + pc$S_ec) / total_w else NA_real_
+  list(C_ee = C_ee, C_ec = C_ec, C_global = C_global, gap = C_ec - C_ee)
+}

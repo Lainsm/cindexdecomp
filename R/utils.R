@@ -35,6 +35,28 @@ validate_survival_inputs <- function(time, status, risk) {
   invisible(TRUE)
 }
 
+#' Validate a weights object and the higher_is_riskier flag
+#'
+#' Shared by [decompose_cindex()] and [censoring_curve()] so the two entry
+#' points can't drift apart on what counts as a valid `weights`/
+#' `higher_is_riskier` pair or on the wording of the resulting error.
+#'
+#' @param weights A `cindex_weights` object.
+#' @param higher_is_riskier Logical, length 1.
+#' @return `invisible(TRUE)` if valid; otherwise an error is thrown.
+#' @keywords internal
+#' @noRd
+validate_weights_and_orientation <- function(weights, higher_is_riskier) {
+  if (!inherits(weights, "cindex_weights")) {
+    stop("`weights` must be a `cindex_weights` object, e.g. weights_harrell().",
+         call. = FALSE)
+  }
+  if (!is.logical(higher_is_riskier) || length(higher_is_riskier) != 1L) {
+    stop("`higher_is_riskier` must be TRUE or FALSE.", call. = FALSE)
+  }
+  invisible(TRUE)
+}
+
 #' Kaplan-Meier estimate of the censoring distribution
 #'
 #' Returns a step function giving `G(t)`, the probability of remaining
