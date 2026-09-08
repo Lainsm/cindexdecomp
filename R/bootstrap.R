@@ -106,14 +106,12 @@ confint.cindex_decomp <- function(object,
       call. = FALSE
     )
   }
-  a <- (1 - level) / 2
-  probs <- c(a, 1 - a)
   out <- t(vapply(
     parm,
-    function(p) stats::quantile(object$boot[, p], probs = probs,
-                                na.rm = TRUE, names = FALSE),
+    function(p) boot_percentile(object$boot, p, level),
     numeric(2)
   ))
+  probs <- c((1 - level) / 2, 1 - (1 - level) / 2)
   colnames(out) <- paste0(format(100 * probs, trim = TRUE), " %")
   rownames(out) <- parm
   out

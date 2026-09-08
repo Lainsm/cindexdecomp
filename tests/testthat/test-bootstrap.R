@@ -126,6 +126,23 @@ test_that("confint does not warn on a healthy fixture", {
   expect_no_warning(confint(r))
 })
 
+test_that("confint computes bounds via the shared boot_percentile helper", {
+  # Regression guard for Ruling R12: confint.cindex_decomp() used to
+  # hand-duplicate the quantile formula instead of calling boot_percentile(),
+  # the same helper compare_decompositions() and the dumbbell autoplot()
+  # paths use. Mocking boot_percentile() to return a distinguishable sentinel
+  # proves confint() actually routes through it, not just that the two
+  # formulas happen to agree numerically.
+  d <- make_test_data(150, seed = 30)
+  r <- decompose_cindex(d$time, d$status, d$risk, n_boot = 100)
+  testthat::local_mocked_bindings(
+    boot_percentile = function(boot, col, level) c(-99, 99)
+  )
+  ci <- confint(r)
+  expect_true(all(ci[, 1] == -99))
+  expect_true(all(ci[, 2] == 99))
+})
+
 test_that("the formula method forwards n_boot and conf_level", {
   d <- make_test_data(120, seed = 12)
   df <- data.frame(time = d$time, status = d$status, risk = d$risk)
