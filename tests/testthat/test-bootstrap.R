@@ -110,6 +110,17 @@ test_that("n_boot is validated", {
                "non-negative")
 })
 
+test_that("n_boot = Inf gives the clean validation message, not a coercion warning", {
+  # Regression: n_boot = Inf passed the `n_boot < 0` check (Inf is not < 0),
+  # then as.integer(Inf) silently produced NA with a "coercion" warning, and
+  # `if (n_boot > 0L)` on that NA threw "missing value where TRUE/FALSE
+  # needed" -- a confusing internal error instead of the package's own
+  # message.
+  d <- make_test_data(100, seed = 10)
+  expect_error(decompose_cindex(d$time, d$status, d$risk, n_boot = Inf),
+               "non-negative")
+})
+
 test_that("confint warns when many bootstrap replicates are dropped", {
   # Few subjects and heavy censoring: most subject resamples will lack
   # enough event-event pairs, so W_ee <= 0 for a large share of replicates.

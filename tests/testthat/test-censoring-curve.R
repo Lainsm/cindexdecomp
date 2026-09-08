@@ -26,6 +26,34 @@ test_that("higher_is_riskier is validated, not silently coerced", {
   )
 })
 
+test_that("n_thresholds is validated", {
+  # Regression: unlike decompose_cindex()'s explicit higher_is_riskier
+  # check, n_thresholds had no validation at all -- a bad value only
+  # surfaced later as a cryptic error from seq()'s `length.out`.
+  d <- make_test_data(200, seed = 20)
+  expect_error(
+    censoring_curve(d$time, d$status, d$risk, n_thresholds = 0),
+    "n_thresholds"
+  )
+  expect_error(
+    censoring_curve(d$time, d$status, d$risk, n_thresholds = -3),
+    "n_thresholds"
+  )
+  expect_error(
+    censoring_curve(d$time, d$status, d$risk, n_thresholds = 2.5),
+    "n_thresholds"
+  )
+})
+
+test_that("n_thresholds is NOT validated when probs is supplied directly", {
+  # n_thresholds is documented as "ignored if probs is supplied" -- an
+  # invalid n_thresholds must not block a call that never uses it.
+  d <- make_test_data(200, seed = 20)
+  cv <- censoring_curve(d$time, d$status, d$risk, n_thresholds = -1,
+                        probs = c(0.1, 0.3, 0.5))
+  expect_s3_class(cv, "cindex_curve")
+})
+
 test_that("the censoring rate is measured on the WHOLE cohort", {
   # Regression: the old code deleted censored subjects on its first line,
   # then reported the censoring rate among events only. On a 500-subject

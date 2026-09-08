@@ -70,7 +70,8 @@ decompose_cindex.default <- function(x, status, risk,
   time <- x
   validate_survival_inputs(time, status, risk)
   validate_weights_and_orientation(weights, higher_is_riskier)
-  if (!is.numeric(n_boot) || length(n_boot) != 1L || n_boot < 0) {
+  if (!is.numeric(n_boot) || length(n_boot) != 1L || !is.finite(n_boot) ||
+      n_boot < 0) {
     stop("`n_boot` must be a single non-negative number.", call. = FALSE)
   }
   if (!is.numeric(conf_level) || length(conf_level) != 1L ||

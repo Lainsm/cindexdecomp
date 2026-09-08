@@ -7,6 +7,17 @@ test_that("autoplot dispatches on a decomposition", {
   expect_s3_class(p, "ggplot")
 })
 
+test_that("a single decomposition's plot doesn't label its row with the literal placeholder", {
+  # Regression: autoplot.cindex_decomp() built a synthetic one-row table
+  # with model = "model" (an internal placeholder, not a real name), so a
+  # single decomposition rendered with the literal word "model" as its
+  # y-axis label.
+  skip_if_no_ggplot()
+  d <- make_test_data(200, seed = 1)
+  p <- ggplot2::autoplot(decompose_cindex(d$time, d$status, d$risk))
+  expect_true(inherits(p$theme$axis.text.y, "element_blank"))
+})
+
 test_that("autoplot dispatches on a censoring curve", {
   skip_if_no_ggplot()
   d <- make_test_data(250, seed = 2)

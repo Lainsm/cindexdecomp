@@ -51,6 +51,12 @@ censoring_curve <- function(time, status, risk,
                             min_pairs = NULL) {
   validate_survival_inputs(time, status, risk)
   validate_weights_and_orientation(weights, higher_is_riskier)
+  if (missing(probs) &&
+      (!is.numeric(n_thresholds) || length(n_thresholds) != 1L ||
+       !is.finite(n_thresholds) || n_thresholds < 1 ||
+       n_thresholds != round(n_thresholds))) {
+    stop("`n_thresholds` must be a single positive integer.", call. = FALSE)
+  }
   if (!higher_is_riskier) risk <- -risk
 
   event_idx <- which(status == 1)

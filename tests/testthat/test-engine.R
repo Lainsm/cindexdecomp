@@ -186,6 +186,20 @@ test_that("decomp_from_pairs NAs only the empty side, not the whole result", {
   expect_true(all(vapply(dec3, is.na, logical(1))))
 })
 
+test_that("a wrong-length weight return gets its own error, not 'negative or non-finite'", {
+  # Regression: a weight fn returning e.g. length-2 tripped the same
+  # "negative or non-finite" message as an actually-negative weight,
+  # misdiagnosing the fault for anyone writing weights_custom().
+  d <- make_test_data(50, seed = 11)
+  w <- weights_custom(function(t, G) c(1, 1), name = "bad-length")
+  err <- tryCatch(
+    pair_counts(d$time, d$status, d$risk, w),
+    error = function(e) conditionMessage(e)
+  )
+  expect_match(err, "single number", fixed = TRUE)
+  expect_false(grepl("negative or non-finite", err, fixed = TRUE))
+})
+
 test_that("N_ee and N_ec count only contributing (non-zero-weight) pairs", {
   d <- make_test_data(200, seed = 13)
   tau <- stats::quantile(d$time[d$status == 1], 0.5, names = FALSE)

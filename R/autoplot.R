@@ -123,7 +123,11 @@ autoplot.cindex_decomp <- function(object, dark = FALSE, ...) {
     ci_ec_lo = ec_ci[1], ci_ec_hi = ec_ci[2],
     stringsAsFactors = FALSE
   )
-  dumbbell_plot(tab, object$weighting, dark, conf_level = object$conf_level)
+  gg <- dumbbell_plot(tab, object$weighting, dark, conf_level = object$conf_level)
+  # A single decomposition has no real category to name its row with --
+  # "model" above is an internal placeholder, not a label worth showing.
+  gg + ggplot2::theme(axis.text.y = ggplot2::element_blank(),
+                      axis.ticks.y = ggplot2::element_blank())
 }
 
 #' @rdname autoplot.cindexdecomp

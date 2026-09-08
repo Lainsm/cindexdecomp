@@ -38,7 +38,14 @@ pair_counts <- function(time, status, risk, weights) {
     if (length(j) == 0L) next
 
     w <- weights$fn(time[i], G)
-    if (length(w) != 1L || !is.finite(w) || w < 0) {
+    if (length(w) != 1L) {
+      stop(
+        "Weight function must return a single number; got length ",
+        length(w), " at t = ", format(time[i]), ".",
+        call. = FALSE
+      )
+    }
+    if (!is.finite(w) || w < 0) {
       stop(
         "Weight function returned a negative or non-finite value at t = ",
         format(time[i]), ".",

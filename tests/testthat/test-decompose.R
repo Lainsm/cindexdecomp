@@ -91,6 +91,21 @@ test_that("invalid input is rejected", {
   expect_error(decompose_cindex(1:5, c(0, 1, 0, 1), rnorm(5)), "same length")
 })
 
+test_that("zero comparable pairs gives NA, never NaN, and doesn't error", {
+  # Two events tied at the same time, no censored subjects: the tie rule
+  # makes two-events-at-once NOT comparable, and there's nothing else to
+  # compare against, so there are zero pairs of either kind. Pooling
+  # 0/0 must read as "undefined" (NA), not as NaN from a bare division.
+  r <- decompose_cindex(c(5, 5), c(1, 1), c(0.1, 0.9))
+  expect_equal(r$N_ee, 0)
+  expect_equal(r$N_ec, 0)
+  expect_true(is.na(r$C_ee) && !is.nan(r$C_ee))
+  expect_true(is.na(r$C_ec) && !is.nan(r$C_ec))
+  expect_true(is.na(r$C_global) && !is.nan(r$C_global))
+  expect_true(is.na(r$gap) && !is.nan(r$gap))
+  expect_output(print(r), "NA")
+})
+
 test_that("the formula method rejects NA the same way the vector method does", {
   # Regression: stats::model.frame()'s default na.action is na.omit, so the
   # formula method silently dropped NA rows (changing the analysis

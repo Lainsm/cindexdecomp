@@ -38,6 +38,44 @@ test_that("validate_survival_inputs requires at least two events", {
   )
 })
 
+test_that("validate_survival_inputs rejects non-numeric status", {
+  # Regression: status %in% c(0, 1) coerces both sides to a common type, so
+  # status = c("0", "1") silently passed as if it meant 0/1 numerically.
+  expect_error(
+    validate_survival_inputs(1:4, c("1", "1", "0", "0"), rnorm(4)),
+    "numeric"
+  )
+})
+
+test_that("validate_survival_inputs rejects n == 0", {
+  expect_error(
+    validate_survival_inputs(numeric(0), numeric(0), numeric(0)),
+    "must not be empty"
+  )
+})
+
+test_that("validate_survival_inputs rejects non-numeric time and risk", {
+  expect_error(
+    validate_survival_inputs(c("1", "2", "3", "4"), c(1, 1, 0, 0), rnorm(4)),
+    "numeric"
+  )
+  expect_error(
+    validate_survival_inputs(1:4, c(1, 1, 0, 0), c("a", "b", "c", "d")),
+    "numeric"
+  )
+})
+
+test_that("validate_survival_inputs rejects non-finite time and risk", {
+  expect_error(
+    validate_survival_inputs(c(1, Inf, 3, 4), c(1, 1, 0, 0), rnorm(4)),
+    "finite"
+  )
+  expect_error(
+    validate_survival_inputs(1:4, c(1, 1, 0, 0), c(1, -Inf, 3, 4)),
+    "finite"
+  )
+})
+
 test_that("censoring_km returns 1 before the first censoring time", {
   d <- make_test_data(200)
   G <- censoring_km(d$time, d$status)

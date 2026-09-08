@@ -14,8 +14,8 @@ validate_survival_inputs <- function(time, status, risk) {
   if (n == 0L) {
     stop("`time`, `status` and `risk` must not be empty.", call. = FALSE)
   }
-  if (!is.numeric(time) || !is.numeric(risk)) {
-    stop("`time` and `risk` must be numeric.", call. = FALSE)
+  if (!is.numeric(time) || !is.numeric(status) || !is.numeric(risk)) {
+    stop("`time`, `status` and `risk` must be numeric.", call. = FALSE)
   }
   if (anyNA(time) || anyNA(status) || anyNA(risk)) {
     stop("`time`, `status` and `risk` must not contain NA.", call. = FALSE)

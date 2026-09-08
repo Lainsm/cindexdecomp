@@ -41,6 +41,29 @@
 * Plots no longer request the "Arial" font family, which is absent on many
   Linux systems, and no longer impose fixed axis limits that hid
   worse-than-chance models.
+* `bootstrap_decomp()` discarded an entire replicate (`C_ee`, `C_ec`,
+  `C_global` and the gap all set to `NA`) whenever either side had zero
+  weight, instead of NA'ing only the empty side as the point estimate
+  already does. Under small samples with heavy censoring this silently
+  threw away usable single-sided draws and could shrink the effective
+  bootstrap size.
+* The dumbbell `autoplot()` suppressed error bars for every model in a
+  `compare_decompositions()` plot if even one model had an unstable
+  bootstrap confidence interval. Bars are now shown per model.
+* `autoplot()` on a `cindex_curve` could draw its shaded band inverted at
+  a threshold where the masking gap was negative.
+* `autoplot()` on a single `cindex_decomp` no longer labels its row with
+  the literal placeholder `"model"`.
+* `validate_survival_inputs()` now rejects non-numeric `status` (e.g.
+  `status = c("0", "1")`), which previously passed silently.
+* `censoring_curve()`'s `n_thresholds` argument is now validated; an
+  invalid value errors immediately instead of surfacing later as a
+  confusing message from the internal quantile calculation.
+* `n_boot = Inf` now gives the package's own validation error instead of a
+  confusing internal one.
+* A malformed custom weight function (`weights_custom()`) returning the
+  wrong length now gets its own error message, distinct from "negative or
+  non-finite".
 
 ## New features
 
