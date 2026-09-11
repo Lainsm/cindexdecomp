@@ -126,8 +126,8 @@ with(fit, (W_ee * C_ee + W_ec * C_ec) / (W_ee + W_ec)) - fit$C_global
 
 | Constructor | Estimator |
 |----|----|
-| [`weights_harrell()`](https://Lainsm.github.io/cindexdecomp/reference/cindex_weights.md) | Harrell’s C |
-| [`weights_uno()`](https://Lainsm.github.io/cindexdecomp/reference/cindex_weights.md) | Uno’s IPCW C |
+| [`weights_harrell()`](https://lainsm.github.io/cindexdecomp/reference/cindex_weights.md) | Harrell’s C |
+| [`weights_uno()`](https://lainsm.github.io/cindexdecomp/reference/cindex_weights.md) | Uno’s IPCW C |
 | `weights_truncated(tau)` | C truncated at `tau` |
 | `weights_custom(fn, name)` | any user-supplied rule |
 
@@ -157,11 +157,11 @@ and for Uno’s weighting when event times are distinct. Under tied times,
 Uno’s pairwise estimator diverges from the counting-process form in
 `survival` by around 1e-04 — immaterial in practice, and explained in
 the vignette
-([`vignette("cindexdecomp")`](https://Lainsm.github.io/cindexdecomp/articles/cindexdecomp.md)).
+([`vignette("cindexdecomp")`](https://lainsm.github.io/cindexdecomp/articles/cindexdecomp.md)).
 
 ## Tracing the masking
 
-[`censoring_curve()`](https://Lainsm.github.io/cindexdecomp/reference/censoring_curve.md)
+[`censoring_curve()`](https://lainsm.github.io/cindexdecomp/reference/censoring_curve.md)
 re-applies the decomposition under a sweep of administrative cut-offs,
 so you can watch `C_global` hold steady while `C_ee` moves:
 
@@ -211,12 +211,12 @@ bars.](reference/figures/README-compare-1.png)
 
 | Function | Description |
 |----|----|
-| [`decompose_cindex()`](https://Lainsm.github.io/cindexdecomp/reference/decompose_cindex.md) | Decomposes into `C_ee` and `C_ec` |
+| [`decompose_cindex()`](https://lainsm.github.io/cindexdecomp/reference/decompose_cindex.md) | Decomposes into `C_ee` and `C_ec` |
 | [`confint()`](https://rdrr.io/r/stats/confint.html) | Bootstrap intervals, including for the masking gap |
-| [`censoring_curve()`](https://Lainsm.github.io/cindexdecomp/reference/censoring_curve.md) | Traces the decomposition as censoring rises |
-| [`compare_decompositions()`](https://Lainsm.github.io/cindexdecomp/reference/compare_decompositions.md) | Runs several models over one cohort |
+| [`censoring_curve()`](https://lainsm.github.io/cindexdecomp/reference/censoring_curve.md) | Traces the decomposition as censoring rises |
+| [`compare_decompositions()`](https://lainsm.github.io/cindexdecomp/reference/compare_decompositions.md) | Runs several models over one cohort |
 | [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html) | Plots any of the above |
-| [`theme_cindex()`](https://Lainsm.github.io/cindexdecomp/reference/theme_cindex.md) | Light (default) and dark plot themes |
+| [`theme_cindex()`](https://lainsm.github.io/cindexdecomp/reference/theme_cindex.md) | Light (default) and dark plot themes |
 
 ## Model agnostic
 
@@ -277,13 +277,13 @@ in Medicine*, 30(10), 1105-1117.
 The entry point, and the bootstrap intervals that say whether the
 masking gap is distinguishable from zero.
 
-- [`decompose_cindex()`](https://Lainsm.github.io/cindexdecomp/reference/decompose_cindex.md)
-  [`print(`*`<cindex_decomp>`*`)`](https://Lainsm.github.io/cindexdecomp/reference/decompose_cindex.md)
-  [`summary(`*`<cindex_decomp>`*`)`](https://Lainsm.github.io/cindexdecomp/reference/decompose_cindex.md)
-  [`as.data.frame(`*`<cindex_decomp>`*`)`](https://Lainsm.github.io/cindexdecomp/reference/decompose_cindex.md)
+- [`decompose_cindex()`](https://lainsm.github.io/cindexdecomp/reference/decompose_cindex.md)
+  [`print(`*`<cindex_decomp>`*`)`](https://lainsm.github.io/cindexdecomp/reference/decompose_cindex.md)
+  [`summary(`*`<cindex_decomp>`*`)`](https://lainsm.github.io/cindexdecomp/reference/decompose_cindex.md)
+  [`as.data.frame(`*`<cindex_decomp>`*`)`](https://lainsm.github.io/cindexdecomp/reference/decompose_cindex.md)
   : Decompose a concordance index into Event-Event and Event-Censored
   parts
-- [`confint(`*`<cindex_decomp>`*`)`](https://Lainsm.github.io/cindexdecomp/reference/confint.cindex_decomp.md)
+- [`confint(`*`<cindex_decomp>`*`)`](https://lainsm.github.io/cindexdecomp/reference/confint.cindex_decomp.md)
   : Bootstrap confidence intervals for a concordance decomposition
 
 ## Weightings
@@ -291,10 +291,10 @@ masking gap is distinguishable from zero.
 A concordance index is fully determined by its pair weighting. These
 constructors supply it.
 
-- [`weights_harrell()`](https://Lainsm.github.io/cindexdecomp/reference/cindex_weights.md)
-  [`weights_uno()`](https://Lainsm.github.io/cindexdecomp/reference/cindex_weights.md)
-  [`weights_truncated()`](https://Lainsm.github.io/cindexdecomp/reference/cindex_weights.md)
-  [`weights_custom()`](https://Lainsm.github.io/cindexdecomp/reference/cindex_weights.md)
+- [`weights_harrell()`](https://lainsm.github.io/cindexdecomp/reference/cindex_weights.md)
+  [`weights_uno()`](https://lainsm.github.io/cindexdecomp/reference/cindex_weights.md)
+  [`weights_truncated()`](https://lainsm.github.io/cindexdecomp/reference/cindex_weights.md)
+  [`weights_custom()`](https://lainsm.github.io/cindexdecomp/reference/cindex_weights.md)
   : Pair weightings for concordance decomposition
 
 ## Censoring and comparison
@@ -302,31 +302,31 @@ constructors supply it.
 Trace the decomposition as censoring rises, or run several models over
 one cohort.
 
-- [`censoring_curve()`](https://Lainsm.github.io/cindexdecomp/reference/censoring_curve.md)
-  [`print(`*`<cindex_curve>`*`)`](https://Lainsm.github.io/cindexdecomp/reference/censoring_curve.md)
-  [`as.data.frame(`*`<cindex_curve>`*`)`](https://Lainsm.github.io/cindexdecomp/reference/censoring_curve.md)
+- [`censoring_curve()`](https://lainsm.github.io/cindexdecomp/reference/censoring_curve.md)
+  [`print(`*`<cindex_curve>`*`)`](https://lainsm.github.io/cindexdecomp/reference/censoring_curve.md)
+  [`as.data.frame(`*`<cindex_curve>`*`)`](https://lainsm.github.io/cindexdecomp/reference/censoring_curve.md)
   : Trace the decomposition as administrative censoring increases
-- [`compare_decompositions()`](https://Lainsm.github.io/cindexdecomp/reference/compare_decompositions.md)
-  [`print(`*`<cindex_comparison>`*`)`](https://Lainsm.github.io/cindexdecomp/reference/compare_decompositions.md)
-  [`as.data.frame(`*`<cindex_comparison>`*`)`](https://Lainsm.github.io/cindexdecomp/reference/compare_decompositions.md)
+- [`compare_decompositions()`](https://lainsm.github.io/cindexdecomp/reference/compare_decompositions.md)
+  [`print(`*`<cindex_comparison>`*`)`](https://lainsm.github.io/cindexdecomp/reference/compare_decompositions.md)
+  [`as.data.frame(`*`<cindex_comparison>`*`)`](https://lainsm.github.io/cindexdecomp/reference/compare_decompositions.md)
   : Compare the decomposition across several models
 
 ## Plotting
 
-- [`autoplot(`*`<cindex_comparison>`*`)`](https://Lainsm.github.io/cindexdecomp/reference/autoplot.cindexdecomp.md)
-  [`autoplot(`*`<cindex_decomp>`*`)`](https://Lainsm.github.io/cindexdecomp/reference/autoplot.cindexdecomp.md)
-  [`autoplot(`*`<cindex_curve>`*`)`](https://Lainsm.github.io/cindexdecomp/reference/autoplot.cindexdecomp.md)
+- [`autoplot(`*`<cindex_comparison>`*`)`](https://lainsm.github.io/cindexdecomp/reference/autoplot.cindexdecomp.md)
+  [`autoplot(`*`<cindex_decomp>`*`)`](https://lainsm.github.io/cindexdecomp/reference/autoplot.cindexdecomp.md)
+  [`autoplot(`*`<cindex_curve>`*`)`](https://lainsm.github.io/cindexdecomp/reference/autoplot.cindexdecomp.md)
   : Plot a concordance decomposition
-- [`theme_cindex()`](https://Lainsm.github.io/cindexdecomp/reference/theme_cindex.md)
+- [`theme_cindex()`](https://lainsm.github.io/cindexdecomp/reference/theme_cindex.md)
   : Plot theme for cindexdecomp
 
 ## Package
 
-- [`cindexdecomp`](https://Lainsm.github.io/cindexdecomp/reference/cindexdecomp-package.md)
-  [`cindexdecomp-package`](https://Lainsm.github.io/cindexdecomp/reference/cindexdecomp-package.md)
+- [`cindexdecomp`](https://lainsm.github.io/cindexdecomp/reference/cindexdecomp-package.md)
+  [`cindexdecomp-package`](https://lainsm.github.io/cindexdecomp/reference/cindexdecomp-package.md)
   : cindexdecomp: C-Index Decomposition for Survival Models
-- [`reexports`](https://Lainsm.github.io/cindexdecomp/reference/reexports.md)
-  [`autoplot`](https://Lainsm.github.io/cindexdecomp/reference/reexports.md)
+- [`reexports`](https://lainsm.github.io/cindexdecomp/reference/reexports.md)
+  [`autoplot`](https://lainsm.github.io/cindexdecomp/reference/reexports.md)
   : Objects exported from other packages
 
 # Articles
@@ -334,4 +334,4 @@ one cohort.
 ### All vignettes
 
 - [Decomposing the
-  C-index](https://Lainsm.github.io/cindexdecomp/articles/cindexdecomp.md):
+  C-index](https://lainsm.github.io/cindexdecomp/articles/cindexdecomp.md):

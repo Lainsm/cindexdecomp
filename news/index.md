@@ -30,7 +30,16 @@ generated and what is hand-written.
 - The whole package is now formatted with `styler::style_pkg()` and
   lints clean under `lintr::lint_package()`.
 - The `test-coverage` workflow computed coverage but never uploaded it;
-  it now reports to Codecov.
+  it now reports to Codecov. The upload is deliberately non-fatal until
+  a `CODECOV_TOKEN` secret exists, so an unconfigured Codecov does not
+  red the build.
+- The documentation URL is now `https://lainsm.github.io/cindexdecomp`,
+  in lower case. GitHub Pages serves user sites from the lower-cased
+  account name and only reaches the capitalised form through a 301,
+  which CRAN’s URL check reports.
+- CI actions pinned to current versions: `actions/checkout@v6`,
+  `codecov/codecov-action` v7 and `github-pages-deploy-action` v4.8.0,
+  both pinned by commit SHA as r-lib now does.
 - `tests/testthat/test-censoring-curve.R` is renamed
   `test-censoring_curve.R` to mirror `R/censoring_curve.R`, the theme
   tests moved from `test-autoplot.R` into their own `test-theme.R`, and
@@ -42,17 +51,17 @@ generated and what is hand-written.
 ### Breaking changes
 
 - The first argument of
-  [`decompose_cindex()`](https://Lainsm.github.io/cindexdecomp/reference/decompose_cindex.md)
+  [`decompose_cindex()`](https://lainsm.github.io/cindexdecomp/reference/decompose_cindex.md)
   is now `x` rather than `time`, as required for S3 dispatch. Calls
   written as `decompose_cindex(time = t, status = s, risk = r)` fail
   with a self-explanatory error pointing at the fix (call positionally,
   use `x =`, or use the formula method) rather than a bare
   `argument "x" is missing` dispatch failure.
-- [`decompose_cindex()`](https://Lainsm.github.io/cindexdecomp/reference/decompose_cindex.md)
+- [`decompose_cindex()`](https://lainsm.github.io/cindexdecomp/reference/decompose_cindex.md)
   returns a `cindex_decomp` object rather than a plain list. Existing
   element access (`$CI_ee`) becomes `$C_ee`.
 - `simulate_censoring()` is renamed
-  [`censoring_curve()`](https://Lainsm.github.io/cindexdecomp/reference/censoring_curve.md)
+  [`censoring_curve()`](https://lainsm.github.io/cindexdecomp/reference/censoring_curve.md)
   and now returns a `cindex_curve` object, not a plain data frame.
   Results are in `$data` (or via
   [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html)), with
@@ -81,10 +90,10 @@ generated and what is hand-written.
   declared once via `higher_is_riskier`.
 - `C_ec` values below 0.50 were silently set to `NA`. Estimates are no
   longer discarded because of their magnitude;
-  [`censoring_curve()`](https://Lainsm.github.io/cindexdecomp/reference/censoring_curve.md)’s
+  [`censoring_curve()`](https://lainsm.github.io/cindexdecomp/reference/censoring_curve.md)’s
   `min_pairs` argument flags rows as `low_precision` instead of deleting
   them
-  ([`decompose_cindex()`](https://Lainsm.github.io/cindexdecomp/reference/decompose_cindex.md)
+  ([`decompose_cindex()`](https://lainsm.github.io/cindexdecomp/reference/decompose_cindex.md)
   has no equivalent threshold).
 - Plots no longer request the “Arial” font family, which is absent on
   many Linux systems, and no longer impose fixed axis limits that hid
@@ -98,7 +107,7 @@ generated and what is hand-written.
 - The dumbbell
   [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
   suppressed error bars for every model in a
-  [`compare_decompositions()`](https://Lainsm.github.io/cindexdecomp/reference/compare_decompositions.md)
+  [`compare_decompositions()`](https://lainsm.github.io/cindexdecomp/reference/compare_decompositions.md)
   plot if even one model had an unstable bootstrap confidence interval.
   Bars are now shown per model.
 - [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
@@ -109,28 +118,28 @@ generated and what is hand-written.
   placeholder `"model"`.
 - `validate_survival_inputs()` now rejects non-numeric `status` (e.g.
   `status = c("0", "1")`), which previously passed silently.
-- [`censoring_curve()`](https://Lainsm.github.io/cindexdecomp/reference/censoring_curve.md)’s
+- [`censoring_curve()`](https://lainsm.github.io/cindexdecomp/reference/censoring_curve.md)’s
   `n_thresholds` argument is now validated; an invalid value errors
   immediately instead of surfacing later as a confusing message from the
   internal quantile calculation.
 - `n_boot = Inf` now gives the package’s own validation error instead of
   a confusing internal one.
 - A malformed custom weight function
-  ([`weights_custom()`](https://Lainsm.github.io/cindexdecomp/reference/cindex_weights.md))
+  ([`weights_custom()`](https://lainsm.github.io/cindexdecomp/reference/cindex_weights.md))
   returning the wrong length now gets its own error message, distinct
   from “negative or non-finite”.
 
 ### New features
 
 - Pluggable pair weightings:
-  [`weights_harrell()`](https://Lainsm.github.io/cindexdecomp/reference/cindex_weights.md),
-  [`weights_uno()`](https://Lainsm.github.io/cindexdecomp/reference/cindex_weights.md),
-  [`weights_truncated()`](https://Lainsm.github.io/cindexdecomp/reference/cindex_weights.md),
-  [`weights_custom()`](https://Lainsm.github.io/cindexdecomp/reference/cindex_weights.md).
+  [`weights_harrell()`](https://lainsm.github.io/cindexdecomp/reference/cindex_weights.md),
+  [`weights_uno()`](https://lainsm.github.io/cindexdecomp/reference/cindex_weights.md),
+  [`weights_truncated()`](https://lainsm.github.io/cindexdecomp/reference/cindex_weights.md),
+  [`weights_custom()`](https://lainsm.github.io/cindexdecomp/reference/cindex_weights.md).
 - Bootstrap inference over subjects, with
   [`confint()`](https://rdrr.io/r/stats/confint.html) covering `C_ee`,
   `C_ec`, `C_global` and the masking gap.
-- [`compare_decompositions()`](https://Lainsm.github.io/cindexdecomp/reference/compare_decompositions.md)
+- [`compare_decompositions()`](https://lainsm.github.io/cindexdecomp/reference/compare_decompositions.md)
   for multi-model comparison.
-- [`theme_cindex()`](https://Lainsm.github.io/cindexdecomp/reference/theme_cindex.md),
+- [`theme_cindex()`](https://lainsm.github.io/cindexdecomp/reference/theme_cindex.md),
   light by default with an opt-in dark variant.

@@ -3,7 +3,7 @@
 A concordance index of the form `C = sum(w_ij * c_ij) / sum(w_ij)` is
 fully determined by its pair weighting `w_ij`. These constructors supply
 that weighting to
-[`decompose_cindex()`](https://Lainsm.github.io/cindexdecomp/reference/decompose_cindex.md).
+[`decompose_cindex()`](https://lainsm.github.io/cindexdecomp/reference/decompose_cindex.md).
 `weights_harrell()` gives Harrell's C, `weights_uno()` gives Uno's
 inverse-probability-of-censoring-weighted C, and `weights_custom()`
 accepts any user-supplied rule.

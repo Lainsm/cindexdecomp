@@ -1,7 +1,7 @@
 # Compare the decomposition across several models
 
 Runs
-[`decompose_cindex()`](https://Lainsm.github.io/cindexdecomp/reference/decompose_cindex.md)
+[`decompose_cindex()`](https://lainsm.github.io/cindexdecomp/reference/decompose_cindex.md)
 for each of several risk scores measured on the same cohort, and
 assembles the results into one table with bootstrap standard deviations.
 This is the input consumed by
@@ -43,12 +43,12 @@ as.data.frame(x, row.names = NULL, optional = FALSE, ...)
 - weights:
 
   A `cindex_weights` object. Defaults to
-  [`weights_harrell()`](https://Lainsm.github.io/cindexdecomp/reference/cindex_weights.md).
+  [`weights_harrell()`](https://lainsm.github.io/cindexdecomp/reference/cindex_weights.md).
 
 - higher_is_riskier:
 
   Logical; see
-  [`decompose_cindex()`](https://Lainsm.github.io/cindexdecomp/reference/decompose_cindex.md).
+  [`decompose_cindex()`](https://lainsm.github.io/cindexdecomp/reference/decompose_cindex.md).
   Applied to every model.
 
 - n_boot:

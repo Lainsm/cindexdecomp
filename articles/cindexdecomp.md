@@ -224,7 +224,7 @@ through rather than assumed away.
 
 ## Censoring curves
 
-[`censoring_curve()`](https://Lainsm.github.io/cindexdecomp/reference/censoring_curve.md)
+[`censoring_curve()`](https://lainsm.github.io/cindexdecomp/reference/censoring_curve.md)
 applies a series of administrative cut-offs to the **whole cohort** and
 recomputes at each. The reported rate is therefore the cohort’s actual
 censoring rate, including subjects censored before any cut-off was

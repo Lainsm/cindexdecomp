@@ -8,11 +8,11 @@ chance on true events can still report a stable global C-index.
 
 The decomposition applies to any concordance index of the form
 `C = sum(w_ij * c_ij) / sum(w_ij)`. The weighting is chosen with
-[`weights_harrell()`](https://Lainsm.github.io/cindexdecomp/reference/cindex_weights.md),
-[`weights_uno()`](https://Lainsm.github.io/cindexdecomp/reference/cindex_weights.md),
-[`weights_truncated()`](https://Lainsm.github.io/cindexdecomp/reference/cindex_weights.md)
+[`weights_harrell()`](https://lainsm.github.io/cindexdecomp/reference/cindex_weights.md),
+[`weights_uno()`](https://lainsm.github.io/cindexdecomp/reference/cindex_weights.md),
+[`weights_truncated()`](https://lainsm.github.io/cindexdecomp/reference/cindex_weights.md)
 or
-[`weights_custom()`](https://Lainsm.github.io/cindexdecomp/reference/cindex_weights.md),
+[`weights_custom()`](https://lainsm.github.io/cindexdecomp/reference/cindex_weights.md),
 and the identity `C = (W_ee * C_ee + W_ec * C_ec) / (W_ee + W_ec)` holds
 for each.
 
@@ -76,7 +76,7 @@ as.data.frame(x, row.names = NULL, optional = FALSE, ...)
 - weights:
 
   A `cindex_weights` object. Defaults to
-  [`weights_harrell()`](https://Lainsm.github.io/cindexdecomp/reference/cindex_weights.md).
+  [`weights_harrell()`](https://lainsm.github.io/cindexdecomp/reference/cindex_weights.md).
 
 - higher_is_riskier:
 

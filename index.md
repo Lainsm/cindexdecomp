@@ -126,8 +126,8 @@ with(fit, (W_ee * C_ee + W_ec * C_ec) / (W_ee + W_ec)) - fit$C_global
 
 | Constructor | Estimator |
 |----|----|
-| [`weights_harrell()`](https://Lainsm.github.io/cindexdecomp/reference/cindex_weights.md) | Harrell’s C |
-| [`weights_uno()`](https://Lainsm.github.io/cindexdecomp/reference/cindex_weights.md) | Uno’s IPCW C |
+| [`weights_harrell()`](https://lainsm.github.io/cindexdecomp/reference/cindex_weights.md) | Harrell’s C |
+| [`weights_uno()`](https://lainsm.github.io/cindexdecomp/reference/cindex_weights.md) | Uno’s IPCW C |
 | `weights_truncated(tau)` | C truncated at `tau` |
 | `weights_custom(fn, name)` | any user-supplied rule |
 
@@ -157,11 +157,11 @@ and for Uno’s weighting when event times are distinct. Under tied times,
 Uno’s pairwise estimator diverges from the counting-process form in
 `survival` by around 1e-04 — immaterial in practice, and explained in
 the vignette
-([`vignette("cindexdecomp")`](https://Lainsm.github.io/cindexdecomp/articles/cindexdecomp.md)).
+([`vignette("cindexdecomp")`](https://lainsm.github.io/cindexdecomp/articles/cindexdecomp.md)).
 
 ## Tracing the masking
 
-[`censoring_curve()`](https://Lainsm.github.io/cindexdecomp/reference/censoring_curve.md)
+[`censoring_curve()`](https://lainsm.github.io/cindexdecomp/reference/censoring_curve.md)
 re-applies the decomposition under a sweep of administrative cut-offs,
 so you can watch `C_global` hold steady while `C_ee` moves:
 
@@ -211,12 +211,12 @@ bars.](reference/figures/README-compare-1.png)
 
 | Function | Description |
 |----|----|
-| [`decompose_cindex()`](https://Lainsm.github.io/cindexdecomp/reference/decompose_cindex.md) | Decomposes into `C_ee` and `C_ec` |
+| [`decompose_cindex()`](https://lainsm.github.io/cindexdecomp/reference/decompose_cindex.md) | Decomposes into `C_ee` and `C_ec` |
 | [`confint()`](https://rdrr.io/r/stats/confint.html) | Bootstrap intervals, including for the masking gap |
-| [`censoring_curve()`](https://Lainsm.github.io/cindexdecomp/reference/censoring_curve.md) | Traces the decomposition as censoring rises |
-| [`compare_decompositions()`](https://Lainsm.github.io/cindexdecomp/reference/compare_decompositions.md) | Runs several models over one cohort |
+| [`censoring_curve()`](https://lainsm.github.io/cindexdecomp/reference/censoring_curve.md) | Traces the decomposition as censoring rises |
+| [`compare_decompositions()`](https://lainsm.github.io/cindexdecomp/reference/compare_decompositions.md) | Runs several models over one cohort |
 | [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html) | Plots any of the above |
-| [`theme_cindex()`](https://Lainsm.github.io/cindexdecomp/reference/theme_cindex.md) | Light (default) and dark plot themes |
+| [`theme_cindex()`](https://lainsm.github.io/cindexdecomp/reference/theme_cindex.md) | Light (default) and dark plot themes |
 
 ## Model agnostic
 

@@ -33,7 +33,7 @@ autoplot(object, dark = FALSE, ...)
 - dark:
 
   Logical. Passed to
-  [`theme_cindex()`](https://Lainsm.github.io/cindexdecomp/reference/theme_cindex.md).
+  [`theme_cindex()`](https://lainsm.github.io/cindexdecomp/reference/theme_cindex.md).
 
 - ...:
 

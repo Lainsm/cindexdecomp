@@ -39,12 +39,12 @@ as.data.frame(x, row.names = NULL, optional = FALSE, ...)
 - weights:
 
   A `cindex_weights` object. Defaults to
-  [`weights_harrell()`](https://Lainsm.github.io/cindexdecomp/reference/cindex_weights.md).
+  [`weights_harrell()`](https://lainsm.github.io/cindexdecomp/reference/cindex_weights.md).
 
 - higher_is_riskier:
 
   Logical; see
-  [`decompose_cindex()`](https://Lainsm.github.io/cindexdecomp/reference/decompose_cindex.md).
+  [`decompose_cindex()`](https://lainsm.github.io/cindexdecomp/reference/decompose_cindex.md).
 
 - n_thresholds:
 
@@ -88,7 +88,7 @@ verifiable at every row:
 `C_global == (W_ee * C_ee + W_ec * C_ec) / (W_ee + W_ec)`. `N_ee`/
 `N_ec` are pair *counts* and only equal `W_ee`/`W_ec` under a weighting
 that assigns every comparable pair weight 1 (Harrell's); under
-[`weights_uno()`](https://Lainsm.github.io/cindexdecomp/reference/cindex_weights.md)
+[`weights_uno()`](https://lainsm.github.io/cindexdecomp/reference/cindex_weights.md)
 or another non-unit weighting the identity does not reconstruct from
 counts alone.
 
