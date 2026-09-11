@@ -27,7 +27,16 @@ what is hand-written.
 * The whole package is now formatted with `styler::style_pkg()` and lints
   clean under `lintr::lint_package()`.
 * The `test-coverage` workflow computed coverage but never uploaded it; it
-  now reports to Codecov.
+  now reports to Codecov. The upload is deliberately non-fatal until a
+  `CODECOV_TOKEN` secret exists, so an unconfigured Codecov does not red the
+  build.
+* The documentation URL is now `https://lainsm.github.io/cindexdecomp`, in
+  lower case. GitHub Pages serves user sites from the lower-cased account
+  name and only reaches the capitalised form through a 301, which CRAN's URL
+  check reports.
+* CI actions pinned to current versions: `actions/checkout@v6`,
+  `codecov/codecov-action` v7 and `github-pages-deploy-action` v4.8.0, both
+  pinned by commit SHA as r-lib now does.
 * `tests/testthat/test-censoring-curve.R` is renamed
   `test-censoring_curve.R` to mirror `R/censoring_curve.R`, the theme tests
   moved from `test-autoplot.R` into their own `test-theme.R`, and the shared

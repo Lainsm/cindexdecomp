@@ -14,7 +14,7 @@ jobs:
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: r-lib/actions/setup-r@v2
         with:
@@ -36,10 +36,15 @@ jobs:
           covr::to_cobertura(cov)
         shell: Rscript {0}
 
-      - uses: codecov/codecov-action@v4
+      - uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
         with:
-          fail_ci_if_error: ${{ github.event_name != 'pull_request' && true || false }}
-          file: ./cobertura.xml
+          # Deliberately NOT r-lib's default of
+          #   ${{ github.event_name != 'pull_request' || secrets.CODECOV_TOKEN }}
+          # which reds the build on every push to main until Codecov is
+          # connected. Coverage still uploads once CODECOV_TOKEN is set; flip
+          # this to the r-lib expression then, so a broken upload is caught.
+          fail_ci_if_error: false
+          files: ./cobertura.xml
           plugins: noop
           disable_search: true
           token: ${{ secrets.CODECOV_TOKEN }}
