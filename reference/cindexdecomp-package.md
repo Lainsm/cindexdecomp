@@ -12,7 +12,7 @@ Useful links:
 
 - <https://github.com/Lainsm/cindexdecomp>
 
-- <https://lainsm.github.io/cindexdecomp>
+- <https://lainsm.github.io/cindexdecomp/>
 
 - Report bugs at <https://github.com/Lainsm/cindexdecomp/issues>
 
