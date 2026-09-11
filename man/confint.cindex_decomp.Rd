@@ -24,9 +24,9 @@ Bootstrap confidence intervals for a concordance decomposition
 }
 \examples{
 set.seed(1)
-time   <- rexp(150, rate = 0.1)
+time <- rexp(150, rate = 0.1)
 status <- rbinom(150, 1, 0.6)
-risk   <- rnorm(150)
+risk <- rnorm(150)
 fit <- decompose_cindex(time, status, risk, n_boot = 50)
 confint(fit)
 }

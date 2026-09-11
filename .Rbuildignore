@@ -2,7 +2,6 @@
 ^\.Rproj\.user$
 ^\.claude$
 ^\.superpowers$
-^docs/superpowers$
 ^\.github$
 ^_pkgdown\.yml$
 ^pkgdown$
@@ -11,3 +10,7 @@
 ^Meta$
 ^LICENSE\.md$
 ^dev$
+^README\.Rmd$
+^cran-comments\.md$
+^\.lintr\.R$
+^\.lintr$

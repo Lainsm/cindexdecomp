@@ -68,9 +68,9 @@ standard deviations. This is the input consumed by
 \examples{
 set.seed(42)
 n <- 200
-time   <- rexp(n, rate = 0.1)
+time <- rexp(n, rate = 0.1)
 status <- rbinom(n, 1, 0.6)
-risks  <- list(model_a = rnorm(n), model_b = rnorm(n))
+risks <- list(model_a = rnorm(n), model_b = rnorm(n))
 compare_decompositions(risks, time, status, n_boot = 0)
 
 }

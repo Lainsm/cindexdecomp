@@ -17,7 +17,7 @@ test_that("weights_uno with tau zeroes weights beyond tau", {
   w <- weights_uno(tau = 100)
   G <- function(t) 0.5
   expect_equal(w$fn(50, G), 4)
-  expect_equal(w$fn(100, G), 1 / 0.5^2)   # t == tau is INSIDE the window
+  expect_equal(w$fn(100, G), 1 / 0.5^2) # t == tau is INSIDE the window
   expect_equal(w$fn(150, G), 0)
 })
 

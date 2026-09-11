@@ -38,8 +38,8 @@ Two risk scores to compare: age alone, and age + ECOG performance status
 (both "higher is riskier" on the natural scale, no need to negate).
 
 ```{r risk-scores}
-risk_age   <- lung2$age
-risk_full  <- lung2$age + 10 * lung2$ph.ecog
+risk_age <- lung2$age
+risk_full <- lung2$age + 10 * lung2$ph.ecog
 ```
 
 ## `weights_*()` constructors

@@ -2,16 +2,41 @@ url: https://Lainsm.github.io/cindexdecomp/
 
 template:
   bootstrap: 5
+  bslib:
+    primary: "#DC267F"    # the Event-Event magenta from cindex_palette()
+    base_font: {google: "Inter"}
+    code_font: {google: "JetBrains Mono"}
+
+home:
+  title: Decompose the C-index into the two ranking tasks it pools
+  description: >
+    Splits a concordance index into its Event-Event and Event-Censored
+    components, so a model that is near chance on true events cannot hide
+    behind a stable pooled score.
+
+navbar:
+  structure:
+    left: [intro, reference, articles, news]
+    right: [search, github]
 
 reference:
   - title: Decomposition
+    desc: >
+      The entry point, and the bootstrap intervals that say whether the
+      masking gap is distinguishable from zero.
     contents:
       - decompose_cindex
       - confint.cindex_decomp
   - title: Weightings
+    desc: >
+      A concordance index is fully determined by its pair weighting. These
+      constructors supply it.
     contents:
       - cindex_weights
   - title: Censoring and comparison
+    desc: >
+      Trace the decomposition as censoring rises, or run several models over
+      one cohort.
     contents:
       - censoring_curve
       - compare_decompositions
@@ -19,3 +44,7 @@ reference:
     contents:
       - autoplot.cindexdecomp
       - theme_cindex
+  - title: Package
+    contents:
+      - cindexdecomp-package
+      - reexports

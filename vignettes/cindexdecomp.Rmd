@@ -8,8 +8,12 @@ vignette: >
 ---
 
 ```{r, include = FALSE}
-knitr::opts_chunk$set(collapse = TRUE, comment = "#>",
-                      fig.width = 7, fig.height = 4.5)
+knitr::opts_chunk$set(
+  collapse = TRUE, comment = "#>",
+  # 8in, not the 7in default: the dumbbell subtitle names the CI level and
+  # the chance line, and clips against the legend at 7in.
+  fig.width = 8, fig.height = 4.5
+)
 ```
 
 ```{r setup}
@@ -57,8 +61,10 @@ fit
 The global figure agrees with `survival::concordance()` exactly:
 
 ```{r}
-c(cindexdecomp = fit$C_global,
-  survival = concordance(Surv(time, status) ~ risk, reverse = TRUE)$concordance)
+c(
+  cindexdecomp = fit$C_global,
+  survival = concordance(Surv(time, status) ~ risk, reverse = TRUE)$concordance
+)
 ```
 
 ## Ties
@@ -87,8 +93,10 @@ weightings <- list(
 
 do.call(rbind, lapply(names(weightings), function(nm) {
   f <- decompose_cindex(time, status, risk, weights = weightings[[nm]])
-  data.frame(weighting = nm, C_global = f$C_global,
-             C_ee = f$C_ee, C_ec = f$C_ec)
+  data.frame(
+    weighting = nm, C_global = f$C_global,
+    C_ee = f$C_ee, C_ec = f$C_ec
+  )
 }))
 ```
 
@@ -119,8 +127,10 @@ distinct, and diverge materially once times are tied:
 ```{r}
 tie_agreement <- function(time, status, risk) {
   ref_h <- concordance(Surv(time, status) ~ risk, reverse = TRUE)$concordance
-  ref_u <- concordance(Surv(time, status) ~ risk, reverse = TRUE,
-                       timewt = "n/G2")$concordance
+  ref_u <- concordance(Surv(time, status) ~ risk,
+    reverse = TRUE,
+    timewt = "n/G2"
+  )$concordance
   fit_h <- decompose_cindex(time, status, risk, weights = weights_harrell())
   fit_u <- decompose_cindex(time, status, risk, weights = weights_uno())
   c(harrell = fit_h$C_global - ref_h, uno = fit_u$C_global - ref_u)
@@ -140,7 +150,7 @@ tie_raw <- rbind(
 tie_tab <- data.frame(
   Data = rownames(tie_raw),
   `Harrell agreement` = formatC(tie_raw[, "harrell"], format = "e", digits = 2),
-  `Uno agreement`     = formatC(tie_raw[, "uno"],     format = "e", digits = 2),
+  `Uno agreement` = formatC(tie_raw[, "uno"], format = "e", digits = 2),
   check.names = FALSE, row.names = NULL
 )
 knitr::kable(tie_tab, align = c("l", "r", "r"))

@@ -91,9 +91,9 @@ The decomposition applies to any concordance index of the form
 }
 \examples{
 set.seed(42)
-time   <- rexp(200, rate = 0.1)
+time <- rexp(200, rate = 0.1)
 status <- rbinom(200, 1, 0.6)
-risk   <- rnorm(200)
+risk <- rnorm(200)
 
 decompose_cindex(time, status, risk)
 decompose_cindex(time, status, risk, weights = weights_uno())

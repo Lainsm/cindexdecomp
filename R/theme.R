@@ -33,25 +33,29 @@ cindex_palette <- function(dark = FALSE) {
 #' @return A ggplot2 theme object.
 #' @examples
 #' library(ggplot2)
-#' ggplot(mtcars, aes(wt, mpg)) + geom_point() + theme_cindex()
+#' ggplot(mtcars, aes(wt, mpg)) +
+#'   geom_point() +
+#'   theme_cindex()
 #' @export
 theme_cindex <- function(dark = FALSE, base_size = 14) {
   p <- cindex_palette(dark)
   ggplot2::theme_classic(base_size = base_size) +
     ggplot2::theme(
-      plot.background   = ggplot2::element_rect(fill = p$bg, colour = NA),
-      panel.background  = ggplot2::element_rect(fill = p$bg, colour = NA),
+      plot.background = ggplot2::element_rect(fill = p$bg, colour = NA),
+      panel.background = ggplot2::element_rect(fill = p$bg, colour = NA),
       legend.background = ggplot2::element_rect(fill = p$bg, colour = NA),
-      legend.key        = ggplot2::element_rect(fill = p$bg, colour = NA),
-      text              = ggplot2::element_text(colour = p$fg),
-      axis.text         = ggplot2::element_text(colour = p$fg),
-      axis.line         = ggplot2::element_line(colour = p$fg),
-      axis.ticks        = ggplot2::element_line(colour = p$fg),
-      panel.grid.major  = ggplot2::element_line(colour = p$grid,
-                                                linewidth = 0.3),
-      panel.grid.minor  = ggplot2::element_blank(),
-      plot.title        = ggplot2::element_text(face = "bold"),
-      plot.subtitle     = ggplot2::element_text(colour = p$fg),
-      plot.margin       = ggplot2::margin(12, 16, 12, 12)
+      legend.key = ggplot2::element_rect(fill = p$bg, colour = NA),
+      text = ggplot2::element_text(colour = p$fg),
+      axis.text = ggplot2::element_text(colour = p$fg),
+      axis.line = ggplot2::element_line(colour = p$fg),
+      axis.ticks = ggplot2::element_line(colour = p$fg),
+      panel.grid.major = ggplot2::element_line(
+        colour = p$grid,
+        linewidth = 0.3
+      ),
+      panel.grid.minor = ggplot2::element_blank(),
+      plot.title = ggplot2::element_text(face = "bold"),
+      plot.subtitle = ggplot2::element_text(colour = p$fg),
+      plot.margin = ggplot2::margin(12, 16, 12, 12)
     )
 }

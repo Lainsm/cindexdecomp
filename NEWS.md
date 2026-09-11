@@ -1,3 +1,39 @@
+# cindexdecomp (development version)
+
+## Packaging and tooling
+
+No user-facing behaviour changed in this section; it records the build and
+documentation infrastructure so a future reader knows what is generated and
+what is hand-written.
+
+* The landing page is now generated: edit `README.Rmd` and re-render with
+  `devtools::build_readme()`. Its examples execute against `survival::lung`,
+  so the printed decompositions, intervals and both figures are real output
+  rather than transcribed. The chunk options seed the bootstrap, so
+  re-rendering does not churn the diff.
+* Added a `pkgdown` site (`_pkgdown.yml`), deployed to GitHub Pages by a new
+  `pkgdown` workflow. The site builds to `docs/`, which is now git-ignored;
+  the design and plan documents that used to live there moved to
+  `dev/superpowers/`.
+* Added `inst/CITATION`, so `citation("cindexdecomp")` gives the intended
+  entry rather than an auto-generated one.
+* Added a `spelling` check (`tests/spelling.R` plus `inst/WORDLIST`) and set
+  `Language: en-GB`.
+* Added a `lint` workflow and an `.lintr.R` config. The config documents why
+  `object_name_linter` is off (the package deliberately mirrors the
+  estimator's notation -- `C_ee`, `W_ec`, `G(t)`) and why
+  `indentation_linter` is off (`styler` is the formatter of record and the
+  two tools disagree by two spaces on wrapped `if` conditions).
+* The whole package is now formatted with `styler::style_pkg()` and lints
+  clean under `lintr::lint_package()`.
+* The `test-coverage` workflow computed coverage but never uploaded it; it
+  now reports to Codecov.
+* `tests/testthat/test-censoring-curve.R` is renamed
+  `test-censoring_curve.R` to mirror `R/censoring_curve.R`, the theme tests
+  moved from `test-autoplot.R` into their own `test-theme.R`, and the shared
+  `skip_if_no_ggplot()` helper moved into `helper-ggplot.R` so any test file
+  can reach it.
+
 # cindexdecomp 0.2.0
 
 ## Breaking changes

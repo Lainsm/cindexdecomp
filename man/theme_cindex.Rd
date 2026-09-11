@@ -23,5 +23,7 @@ render without warnings on machines that lack any particular typeface.
 }
 \examples{
 library(ggplot2)
-ggplot(mtcars, aes(wt, mpg)) + geom_point() + theme_cindex()
+ggplot(mtcars, aes(wt, mpg)) +
+  geom_point() +
+  theme_cindex()
 }

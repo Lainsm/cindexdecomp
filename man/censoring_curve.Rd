@@ -73,9 +73,9 @@ censoring rate is the cohort's actual censoring rate at that cut-off.
 }
 \examples{
 set.seed(42)
-time   <- rexp(300, rate = 0.1)
+time <- rexp(300, rate = 0.1)
 status <- rbinom(300, 1, 0.6)
-risk   <- rnorm(300)
+risk <- rnorm(300)
 censoring_curve(time, status, risk, n_thresholds = 8)
 
 }

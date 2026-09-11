@@ -1,0 +1,24 @@
+citHeader("To cite cindexdecomp in publications, use:")
+
+## `meta` is the parsed DESCRIPTION, supplied by utils::citation().
+## `%||%` is only base R from 4.4.0 and this package supports 4.1.0, so the
+## fallback is spelled out rather than piped through it.
+year <- if (!is.null(meta$Date)) {
+  sub("-.*", "", meta$Date)
+} else {
+  format(Sys.Date(), "%Y")
+}
+
+bibentry(
+  bibtype = "Manual",
+  title   = "{cindexdecomp}: C-Index Decomposition for Survival Models",
+  author  = person("Malik J.", "Lainsbury"),
+  year    = year,
+  note    = paste("R package version", meta$Version),
+  url     = "https://github.com/Lainsm/cindexdecomp",
+  textVersion = paste0(
+    "Lainsbury MJ (", year, "). cindexdecomp: C-Index Decomposition for ",
+    "Survival Models. R package version ", meta$Version, ". ",
+    "https://github.com/Lainsm/cindexdecomp"
+  )
+)

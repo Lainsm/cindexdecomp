@@ -27,8 +27,12 @@ pair_counts <- function(time, status, risk, weights) {
   G <- censoring_km(time, status)
   event_idx <- which(status == 1)
 
-  W_ee <- 0; S_ee <- 0; N_ee <- 0
-  W_ec <- 0; S_ec <- 0; N_ec <- 0
+  W_ee <- 0
+  S_ee <- 0
+  N_ee <- 0
+  W_ec <- 0
+  S_ec <- 0
+  N_ec <- 0
 
   for (i in event_idx) {
     # An event at time[i] precedes a censoring recorded at the same time,

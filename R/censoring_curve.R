@@ -37,9 +37,9 @@
 #'
 #' @examples
 #' set.seed(42)
-#' time   <- rexp(300, rate = 0.1)
+#' time <- rexp(300, rate = 0.1)
 #' status <- rbinom(300, 1, 0.6)
-#' risk   <- rnorm(300)
+#' risk <- rnorm(300)
 #' censoring_curve(time, status, risk, n_thresholds = 8)
 #'
 #' @export
@@ -52,9 +52,9 @@ censoring_curve <- function(time, status, risk,
   validate_survival_inputs(time, status, risk)
   validate_weights_and_orientation(weights, higher_is_riskier)
   if (missing(probs) &&
-      (!is.numeric(n_thresholds) || length(n_thresholds) != 1L ||
-       !is.finite(n_thresholds) || n_thresholds < 1 ||
-       n_thresholds != round(n_thresholds))) {
+    (!is.numeric(n_thresholds) || length(n_thresholds) != 1L ||
+      !is.finite(n_thresholds) || n_thresholds < 1 ||
+      n_thresholds != round(n_thresholds))) {
     stop("`n_thresholds` must be a single positive integer.", call. = FALSE)
   }
   if (!higher_is_riskier) risk <- -risk
@@ -72,11 +72,15 @@ censoring_curve <- function(time, status, risk,
     # censored; events after the cut-off become censored at it.
     sim_time <- pmin(time, tau)
     sim_status <- status * as.numeric(time <= tau)
-    if (sum(sim_status) < 2) return(NULL)
+    if (sum(sim_status) < 2) {
+      return(NULL)
+    }
 
     pc <- pair_counts(sim_time, sim_status, risk, weights)
     total_w <- pc$W_ee + pc$W_ec
-    if (total_w <= 0) return(NULL)
+    if (total_w <= 0) {
+      return(NULL)
+    }
     dec <- decomp_from_pairs(pc)
 
     data.frame(
@@ -97,7 +101,9 @@ censoring_curve <- function(time, status, risk,
   dat <- do.call(rbind, rows)
   if (is.null(dat) || nrow(dat) == 0L) {
     stop("No threshold produced enough events to decompose. ",
-         "Try a smaller `probs` range.", call. = FALSE)
+      "Try a smaller `probs` range.",
+      call. = FALSE
+    )
   }
   dat <- dat[order(dat$censoring), , drop = FALSE]
   rownames(dat) <- NULL
@@ -121,17 +127,25 @@ censoring_curve <- function(time, status, risk,
 #' @export
 print.cindex_curve <- function(x, ...) {
   cat("Censoring Curve\n")
-  cat(sprintf("Weighting: %s | n = %d, events = %d | %d thresholds\n",
-              x$weighting, x$n, x$n_events, nrow(x$data)))
-  cat(sprintf("Censoring range: %.1f%% to %.1f%%\n\n",
-              100 * min(x$data$censoring), 100 * max(x$data$censoring)))
-  show <- x$data[, c("censoring", "C_ee", "C_ec", "C_global", "N_ee",
-                     "low_precision")]
+  cat(sprintf(
+    "Weighting: %s | n = %d, events = %d | %d thresholds\n",
+    x$weighting, x$n, x$n_events, nrow(x$data)
+  ))
+  cat(sprintf(
+    "Censoring range: %.1f%% to %.1f%%\n\n",
+    100 * min(x$data$censoring), 100 * max(x$data$censoring)
+  ))
+  show <- x$data[, c(
+    "censoring", "C_ee", "C_ec", "C_global", "N_ee",
+    "low_precision"
+  )]
   show$censoring <- sprintf("%.1f%%", 100 * show$censoring)
   print(show, digits = 4, row.names = FALSE)
   if (any(x$data$low_precision)) {
-    cat(sprintf("\n%d row(s) flagged low_precision (N_ee < %d).",
-                sum(x$data$low_precision), x$min_pairs))
+    cat(sprintf(
+      "\n%d row(s) flagged low_precision (N_ee < %d).",
+      sum(x$data$low_precision), x$min_pairs
+    ))
     cat(" Estimates are shown, not removed.\n")
   }
   invisible(x)

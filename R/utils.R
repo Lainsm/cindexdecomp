@@ -9,7 +9,9 @@
 validate_survival_inputs <- function(time, status, risk) {
   n <- length(time)
   if (length(status) != n || length(risk) != n) {
-    stop("`time`, `status` and `risk` must all have the same length.", call. = FALSE)
+    stop("`time`, `status` and `risk` must all have the same length.",
+      call. = FALSE
+    )
   }
   if (n == 0L) {
     stop("`time`, `status` and `risk` must not be empty.", call. = FALSE)
@@ -20,7 +22,7 @@ validate_survival_inputs <- function(time, status, risk) {
   if (anyNA(time) || anyNA(status) || anyNA(risk)) {
     stop("`time`, `status` and `risk` must not contain NA.", call. = FALSE)
   }
-  if (any(!is.finite(time)) || any(!is.finite(risk))) {
+  if (!all(is.finite(time)) || !all(is.finite(risk))) {
     stop("`time` and `risk` must be finite.", call. = FALSE)
   }
   if (any(time < 0)) {
@@ -30,7 +32,9 @@ validate_survival_inputs <- function(time, status, risk) {
     stop("`status` must be binary (0 = censored, 1 = event).", call. = FALSE)
   }
   if (sum(status == 1) < 2) {
-    stop("At least 2 events are required to decompose the C-index.", call. = FALSE)
+    stop("At least 2 events are required to decompose the C-index.",
+      call. = FALSE
+    )
   }
   invisible(TRUE)
 }
@@ -49,7 +53,8 @@ validate_survival_inputs <- function(time, status, risk) {
 validate_weights_and_orientation <- function(weights, higher_is_riskier) {
   if (!inherits(weights, "cindex_weights")) {
     stop("`weights` must be a `cindex_weights` object, e.g. weights_harrell().",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
   if (!is.logical(higher_is_riskier) || length(higher_is_riskier) != 1L) {
     stop("`higher_is_riskier` must be TRUE or FALSE.", call. = FALSE)

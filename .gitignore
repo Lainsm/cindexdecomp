@@ -9,3 +9,7 @@
 **/*.quarto_ipynb
 /doc/
 /Meta/
+
+# pkgdown site, built locally; CI deploys from a clean build
+/docs/
+/pkgdown/

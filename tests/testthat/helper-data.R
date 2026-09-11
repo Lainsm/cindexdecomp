@@ -1,5 +1,6 @@
 # Shared fixtures. `ties = TRUE` rounds times to whole numbers, which is how
-# real survival data arrives (days) and is the case that exercises the tie rules.
+# real survival data arrives (days) and is the case that exercises the tie
+# rules.
 make_test_data <- function(n = 300, censor_rate = 0.4, ties = FALSE, seed = 1) {
   set.seed(seed)
   risk <- rnorm(n)
@@ -25,7 +26,7 @@ make_test_data <- function(n = 300, censor_rate = 0.4, ties = FALSE, seed = 1) {
 make_tied_pair_data <- function() {
   list(
     time   = c(100, 100, 200, 300),
-    status = c(  1,   0,   1,   1),
+    status = c(1, 0, 1, 1),
     risk   = c(0.9, 0.2, 0.5, 0.1)
   )
 }

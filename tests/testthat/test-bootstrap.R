@@ -1,7 +1,10 @@
 test_that("bootstrap_decomp returns the expected shape", {
   d <- make_test_data(150, seed = 1)
   set.seed(1)
-  b <- bootstrap_decomp(d$time, d$status, d$risk, weights_harrell(), n_boot = 20)
+  b <- bootstrap_decomp(
+    d$time, d$status, d$risk, weights_harrell(),
+    n_boot = 20
+  )
   expect_true(is.matrix(b))
   expect_equal(nrow(b), 20)
   expect_equal(colnames(b), c("C_ee", "C_ec", "C_global", "gap"))
@@ -40,14 +43,16 @@ test_that("the gap is computed within each replicate, preserving correlation", {
   # combining two marginal SEs overstates it (measured ~26% on n=300).
   sd_gap_paired <- stats::sd(r$boot[, "gap"], na.rm = TRUE)
   sd_gap_naive <- sqrt(stats::sd(r$boot[, "C_ee"], na.rm = TRUE)^2 +
-                       stats::sd(r$boot[, "C_ec"], na.rm = TRUE)^2)
+    stats::sd(r$boot[, "C_ec"], na.rm = TRUE)^2)
   expect_lt(sd_gap_paired, sd_gap_naive)
 })
 
 test_that("the bootstrap is reproducible under set.seed", {
   d <- make_test_data(120, seed = 4)
-  set.seed(99); a <- decompose_cindex(d$time, d$status, d$risk, n_boot = 40)
-  set.seed(99); b <- decompose_cindex(d$time, d$status, d$risk, n_boot = 40)
+  set.seed(99)
+  a <- decompose_cindex(d$time, d$status, d$risk, n_boot = 40)
+  set.seed(99)
+  b <- decompose_cindex(d$time, d$status, d$risk, n_boot = 40)
   expect_equal(a$boot, b$boot)
 })
 
@@ -93,8 +98,10 @@ test_that("confint respects the level argument", {
   r <- decompose_cindex(d$time, d$status, d$risk, n_boot = 300)
   wide <- confint(r, level = 0.99)
   narrow <- confint(r, level = 0.80)
-  expect_gt(wide["C_ee", 2] - wide["C_ee", 1],
-            narrow["C_ee", 2] - narrow["C_ee", 1])
+  expect_gt(
+    wide["C_ee", 2] - wide["C_ee", 1],
+    narrow["C_ee", 2] - narrow["C_ee", 1]
+  )
 })
 
 test_that("confint can select a subset of parameters", {
@@ -106,8 +113,10 @@ test_that("confint can select a subset of parameters", {
 
 test_that("n_boot is validated", {
   d <- make_test_data(100, seed = 10)
-  expect_error(decompose_cindex(d$time, d$status, d$risk, n_boot = -5),
-               "non-negative")
+  expect_error(
+    decompose_cindex(d$time, d$status, d$risk, n_boot = -5),
+    "non-negative"
+  )
 })
 
 test_that("n_boot = Inf gives the clean validation message, not a coercion warning", {
@@ -117,8 +126,10 @@ test_that("n_boot = Inf gives the clean validation message, not a coercion warni
   # needed" -- a confusing internal error instead of the package's own
   # message.
   d <- make_test_data(100, seed = 10)
-  expect_error(decompose_cindex(d$time, d$status, d$risk, n_boot = Inf),
-               "non-negative")
+  expect_error(
+    decompose_cindex(d$time, d$status, d$risk, n_boot = Inf),
+    "non-negative"
+  )
 })
 
 test_that("confint warns when many bootstrap replicates are dropped", {
@@ -145,7 +156,10 @@ test_that("bootstrap_decomp keeps a usable C_ee when only C_ec's side is empty",
   # handful of censored subjects entirely, giving W_ec == 0 while W_ee > 0.
   d <- make_test_data(10, censor_rate = 0.15, seed = 4)
   set.seed(1)
-  b <- bootstrap_decomp(d$time, d$status, d$risk, weights_harrell(), n_boot = 300)
+  b <- bootstrap_decomp(
+    d$time, d$status, d$risk, weights_harrell(),
+    n_boot = 300
+  )
   n_ee_only <- sum(!is.na(b[, "C_ee"]) & is.na(b[, "C_ec"]))
   expect_gt(n_ee_only, 0)
 })
@@ -170,8 +184,10 @@ test_that("confint computes bounds via the shared boot_percentile helper", {
 test_that("the formula method forwards n_boot and conf_level", {
   d <- make_test_data(120, seed = 12)
   df <- data.frame(time = d$time, status = d$status, risk = d$risk)
-  r <- decompose_cindex(survival::Surv(time, status) ~ risk, data = df,
-                        n_boot = 25, conf_level = 0.9)
+  r <- decompose_cindex(survival::Surv(time, status) ~ risk,
+    data = df,
+    n_boot = 25, conf_level = 0.9
+  )
   expect_equal(nrow(r$boot), 25)
   expect_equal(r$n_boot, 25)
   expect_equal(r$conf_level, 0.9)

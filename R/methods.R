@@ -18,8 +18,10 @@ print.cindex_decomp <- function(x, ...) {
 
   row <- function(label, value, npairs, key) {
     share <- if (total_n > 0) 100 * npairs / total_n else NA_real_
-    line <- sprintf("  %-16s %8.4f %11s %7.1f%%",
-                    label, value, fmt_n(npairs), share)
+    line <- sprintf(
+      "  %-16s %8.4f %11s %7.1f%%",
+      label, value, fmt_n(npairs), share
+    )
     if (!is.null(ci) && key %in% rownames(ci)) {
       line <- paste0(line, sprintf("   [%.4f, %.4f]", ci[key, 1], ci[key, 2]))
     }
@@ -52,10 +54,13 @@ print.cindex_decomp <- function(x, ...) {
   }
   if (!is.na(x$C_global) && x$C_global < 0.5) {
     cat("  ! Global C-index is below 0.50. If the risk score is oriented\n")
-    cat("    so that higher means lower hazard, set higher_is_riskier = FALSE.\n")
+    cat(
+      "    so that higher means lower hazard, set",
+      "higher_is_riskier = FALSE.\n"
+    )
   }
   if (!is.null(x$boot) && !is.na(x$n_boot_valid) &&
-      x$n_boot_valid < 0.9 * x$n_boot) {
+    x$n_boot_valid < 0.9 * x$n_boot) {
     cat(sprintf(
       "  ! Only %d of %d bootstrap replicates were usable (%.0f%%).\n",
       x$n_boot_valid, x$n_boot, 100 * x$n_boot_valid / x$n_boot
@@ -63,8 +68,10 @@ print.cindex_decomp <- function(x, ...) {
     cat("    Intervals above are unreliable; consider more events or n_boot.\n")
   }
   if (is.null(ci)) {
-    cat("  Pair counts describe composition, not precision.",
-        "Set n_boot > 0 for intervals.\n")
+    cat(
+      "  Pair counts describe composition, not precision.",
+      "Set n_boot > 0 for intervals.\n"
+    )
   }
   invisible(x)
 }
@@ -84,8 +91,10 @@ print.summary.cindex_decomp <- function(x, ...) {
     cat("none (n_boot = 0)\n")
   } else {
     n_ok <- x$fit$n_boot_valid
-    cat(sprintf("%d replicates (%d usable), subject-level resampling, %s level\n",
-                x$fit$n_boot, n_ok, fmt_level(x$fit$conf_level)))
+    cat(sprintf(
+      "%d replicates (%d usable), subject-level resampling, %s level\n",
+      x$fit$n_boot, n_ok, fmt_level(x$fit$conf_level)
+    ))
   }
   cat(sprintf("Orientation: higher_is_riskier = %s\n", x$fit$higher_is_riskier))
   invisible(x)

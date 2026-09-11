@@ -34,11 +34,11 @@ test_that("print flags near-chance event-event concordance", {
   d <- make_test_data(300, seed = 5)
   r <- decompose_cindex(d$time, d$status, d$risk)
 
-  r$C_ee <- 0.51  # near chance: should get the "near chance" wording
+  r$C_ee <- 0.51 # near chance: should get the "near chance" wording
   out_near <- capture.output(print(r))
   expect_true(any(grepl("near chance", out_near)))
 
-  r$C_ee <- 0.10  # well below chance: a different, more accurate finding
+  r$C_ee <- 0.10 # well below chance: a different, more accurate finding
   out_below <- capture.output(print(r))
   expect_true(any(grepl("systematically reversed", out_below)))
   expect_false(any(grepl("near chance", out_below)))
@@ -64,8 +64,10 @@ test_that("as.data.frame returns one tidy row", {
   df <- as.data.frame(r)
   expect_s3_class(df, "data.frame")
   expect_equal(nrow(df), 1)
-  expect_true(all(c("C_ee", "C_ec", "C_global", "gap", "N_ee", "N_ec",
-                    "weighting") %in% names(df)))
+  expect_true(all(c(
+    "C_ee", "C_ec", "C_global", "gap", "N_ee", "N_ec",
+    "weighting"
+  ) %in% names(df)))
   expect_equal(df$C_ee, r$C_ee, tolerance = 1e-12)
 })
 
@@ -75,8 +77,10 @@ test_that("print and summary agree on the confidence level string", {
   # like 0.975 rendered as "97.5 CI" in one place and "98% level" in the
   # other. Both must show the same string.
   d <- make_test_data(150, seed = 9)
-  r <- decompose_cindex(d$time, d$status, d$risk, n_boot = 50,
-                        conf_level = 0.975)
+  r <- decompose_cindex(d$time, d$status, d$risk,
+    n_boot = 50,
+    conf_level = 0.975
+  )
   print_out <- capture.output(print(r))
   summary_out <- capture.output(print(summary(r)))
   expect_true(any(grepl("97.5%", print_out, fixed = TRUE)))

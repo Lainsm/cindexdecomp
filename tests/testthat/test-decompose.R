@@ -17,7 +17,8 @@ test_that("C_global matches survival::concordance", {
   d <- make_test_data(300, ties = TRUE, seed = 2)
   r <- decompose_cindex(d$time, d$status, d$risk)
   ref <- survival::concordance(
-    survival::Surv(d$time, d$status) ~ d$risk, reverse = TRUE
+    survival::Surv(d$time, d$status) ~ d$risk,
+    reverse = TRUE
   )$concordance
   expect_equal(r$C_global, ref, tolerance = 1e-12)
 })
@@ -44,8 +45,10 @@ test_that("the formula method rejects a non-Surv response", {
 
 test_that("the formula method rejects multiple predictors", {
   d <- make_test_data(50, seed = 5)
-  df <- data.frame(time = d$time, status = d$status,
-                   risk = d$risk, other = rnorm(50))
+  df <- data.frame(
+    time = d$time, status = d$status,
+    risk = d$risk, other = rnorm(50)
+  )
   expect_error(
     decompose_cindex(survival::Surv(time, status) ~ risk + other, data = df),
     "exactly one"
@@ -56,7 +59,7 @@ test_that("higher_is_riskier = FALSE flips ALL components together", {
   # Regression: the old code flipped only the global value, breaking the
   # identity and drawing a global line above both of its own components.
   d <- make_test_data(200, seed = 6)
-  a <- decompose_cindex(d$time, d$status,  d$risk, higher_is_riskier = TRUE)
+  a <- decompose_cindex(d$time, d$status, d$risk, higher_is_riskier = TRUE)
   b <- decompose_cindex(d$time, d$status, -d$risk, higher_is_riskier = FALSE)
   expect_equal(a$C_ee, b$C_ee, tolerance = 1e-12)
   expect_equal(a$C_ec, b$C_ec, tolerance = 1e-12)
@@ -69,7 +72,7 @@ test_that("higher_is_riskier = FALSE flips ALL components together", {
 test_that("sub-0.5 concordance is reported, never flipped", {
   # Regression: `ifelse(c < 0.5, 1 - c, c)` reported a 0.44 model as 0.56.
   d <- make_test_data(300, seed = 7)
-  r <- decompose_cindex(d$time, d$status, -d$risk)  # deliberately backwards
+  r <- decompose_cindex(d$time, d$status, -d$risk) # deliberately backwards
   expect_lt(r$C_global, 0.5)
 })
 

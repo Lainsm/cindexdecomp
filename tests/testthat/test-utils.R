@@ -96,9 +96,14 @@ test_that("validate_weights_and_orientation rejects a non-cindex_weights object"
 })
 
 test_that("validate_weights_and_orientation rejects a non-scalar-logical higher_is_riskier", {
-  expect_error(validate_weights_and_orientation(weights_harrell(), 0), "TRUE or FALSE")
-  expect_error(validate_weights_and_orientation(weights_harrell(), c(TRUE, TRUE)),
-               "TRUE or FALSE")
+  expect_error(
+    validate_weights_and_orientation(weights_harrell(), 0),
+    "TRUE or FALSE"
+  )
+  expect_error(
+    validate_weights_and_orientation(weights_harrell(), c(TRUE, TRUE)),
+    "TRUE or FALSE"
+  )
 })
 
 test_that("decompose_cindex and censoring_curve give the IDENTICAL weights error", {

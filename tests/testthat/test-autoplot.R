@@ -1,5 +1,3 @@
-skip_if_no_ggplot <- function() skip_if_not_installed("ggplot2")
-
 test_that("autoplot dispatches on a decomposition", {
   skip_if_no_ggplot()
   d <- make_test_data(200, seed = 1)
@@ -22,7 +20,8 @@ test_that("autoplot dispatches on a censoring curve", {
   skip_if_no_ggplot()
   d <- make_test_data(250, seed = 2)
   p <- ggplot2::autoplot(censoring_curve(d$time, d$status, d$risk,
-                                         n_thresholds = 6))
+    n_thresholds = 6
+  ))
   expect_s3_class(p, "ggplot")
 })
 
@@ -31,7 +30,8 @@ test_that("autoplot dispatches on a comparison", {
   d <- make_test_data(200, seed = 3)
   cmp <- compare_decompositions(
     list(a = d$risk, b = d$risk + rnorm(200)),
-    d$time, d$status, n_boot = 20
+    d$time, d$status,
+    n_boot = 20
   )
   expect_s3_class(ggplot2::autoplot(cmp), "ggplot")
 })
@@ -51,7 +51,9 @@ test_that("a worse-than-chance model still appears in the plot data", {
   skip_if_no_ggplot()
   d <- make_test_data(250, seed = 5)
   cmp <- compare_decompositions(list(backwards = -d$risk), d$time,
-                                d$status, n_boot = 0)
+    d$status,
+    n_boot = 0
+  )
   expect_lt(cmp$table$global_c, 0.5)
   p <- ggplot2::autoplot(cmp)
   built <- ggplot2::ggplot_build(p)
@@ -67,25 +69,12 @@ test_that("no plot sets a hardcoded font family", {
   ps <- list(
     ggplot2::autoplot(decompose_cindex(d$time, d$status, d$risk)),
     ggplot2::autoplot(censoring_curve(d$time, d$status, d$risk,
-                                      n_thresholds = 4))
+      n_thresholds = 4
+    ))
   )
   for (p in ps) {
     expect_false(identical(p$theme$text$family, "Arial"))
   }
-})
-
-test_that("theme_cindex defaults to light and offers dark", {
-  skip_if_no_ggplot()
-  light <- theme_cindex()
-  dark <- theme_cindex(dark = TRUE)
-  expect_s3_class(light, "theme")
-  expect_equal(light$plot.background$fill, "#FFFFFF")
-  expect_equal(dark$plot.background$fill, "#282A36")
-})
-
-test_that("theme_cindex sets no font family", {
-  skip_if_no_ggplot()
-  expect_false(identical(theme_cindex()$text$family, "Arial"))
 })
 
 test_that("the curve plot's subtitle names what the ribbon actually spans", {
@@ -109,8 +98,10 @@ test_that("the dumbbell plot's error bars are labelled with the level they draw"
   # percentile interval and the subtitle names the level.
   skip_if_no_ggplot()
   d <- make_test_data(200, seed = 9)
-  r <- decompose_cindex(d$time, d$status, d$risk, n_boot = 150,
-                        conf_level = 0.9)
+  r <- decompose_cindex(d$time, d$status, d$risk,
+    n_boot = 150,
+    conf_level = 0.9
+  )
   p <- ggplot2::autoplot(r)
   subtitle <- p$labels$subtitle
   expect_true(grepl("90% CI", subtitle, fixed = TRUE))
@@ -149,8 +140,10 @@ test_that("the dumbbell plot draws error bars per-model, not all-or-nothing", {
   )
   p <- dumbbell_plot(tab, "Harrell", dark = FALSE, conf_level = 0.95)
   built <- ggplot2::ggplot_build(p)
-  is_errorbar <- vapply(p$layers, function(l) inherits(l$geom, "GeomErrorbar"),
-                        logical(1))
+  is_errorbar <- vapply(
+    p$layers, function(l) inherits(l$geom, "GeomErrorbar"),
+    logical(1)
+  )
   expect_true(any(is_errorbar))
   for (dd in built$data[is_errorbar]) expect_equal(nrow(dd), 1)
   expect_true(grepl("CI", p$labels$subtitle, fixed = TRUE))
@@ -167,7 +160,7 @@ test_that("the curve plot's ribbon never inverts when the gap is negative", {
       data = data.frame(
         threshold = c(10, 20), censoring = c(0.3, 0.6),
         C_ee = c(0.70, 0.60), C_ec = c(0.65, 0.75),
-        C_global = c(0.68, 0.68),  # row 1: C_ee > C_global, negative gap
+        C_global = c(0.68, 0.68), # row 1: C_ee > C_global, negative gap
         low_precision = c(FALSE, FALSE)
       ),
       weighting = "Harrell"
@@ -176,8 +169,10 @@ test_that("the curve plot's ribbon never inverts when the gap is negative", {
   )
   p <- ggplot2::autoplot(cv)
   built <- ggplot2::ggplot_build(p)
-  is_ribbon <- vapply(p$layers, function(l) inherits(l$geom, "GeomRibbon"),
-                      logical(1))
+  is_ribbon <- vapply(
+    p$layers, function(l) inherits(l$geom, "GeomRibbon"),
+    logical(1)
+  )
   ribbon_data <- built$data[[which(is_ribbon)]]
   expect_true(all(ribbon_data$ymin <= ribbon_data$ymax))
 })
@@ -185,8 +180,10 @@ test_that("the curve plot's ribbon never inverts when the gap is negative", {
 test_that("the curve plot marks low-precision points without dropping them", {
   skip_if_no_ggplot()
   d <- make_test_data(250, seed = 7)
-  cv <- censoring_curve(d$time, d$status, d$risk, n_thresholds = 6,
-                        min_pairs = 10^9)
+  cv <- censoring_curve(d$time, d$status, d$risk,
+    n_thresholds = 6,
+    min_pairs = 10^9
+  )
   expect_true(all(cv$data$low_precision))
   p <- ggplot2::autoplot(cv)
   built <- ggplot2::ggplot_build(p)

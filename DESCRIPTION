@@ -23,8 +23,12 @@ Suggests:
     covr,
     knitr,
     rmarkdown,
+    spelling,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
+Config/Needs/website: pkgdown
+Config/Needs/lint: lintr
+Language: en-GB
 VignetteBuilder: knitr
 URL: https://github.com/Lainsm/cindexdecomp, https://Lainsm.github.io/cindexdecomp
 BugReports: https://github.com/Lainsm/cindexdecomp/issues

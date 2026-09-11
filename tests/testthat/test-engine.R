@@ -17,9 +17,12 @@ test_that("event-censored ties are counted as comparable", {
 
 test_that("event-event ties are NOT comparable", {
   # Two deaths at the same time: we cannot say who came first.
-  d <- list(time = c(100, 100, 300), status = c(1, 1, 1), risk = c(0.9, 0.2, 0.1))
+  d <- list(
+    time = c(100, 100, 300), status = c(1, 1, 1),
+    risk = c(0.9, 0.2, 0.1)
+  )
   pc <- pair_counts(d$time, d$status, d$risk, weights_harrell())
-  expect_equal(pc$N_ee + pc$N_ec, 2)  # (A,C) and (B,C) only
+  expect_equal(pc$N_ee + pc$N_ec, 2) # (A,C) and (B,C) only
 })
 
 test_that("pooled decomposition matches survival::concordance, continuous times", {
@@ -130,7 +133,7 @@ test_that("the weighted identity holds for arbitrary custom weights", {
 
 test_that("negating risk gives 1 - C", {
   d <- make_test_data(200, seed = 9)
-  a <- pooled_from(pair_counts(d$time, d$status,  d$risk, weights_harrell()))
+  a <- pooled_from(pair_counts(d$time, d$status, d$risk, weights_harrell()))
   b <- pooled_from(pair_counts(d$time, d$status, -d$risk, weights_harrell()))
   expect_equal(a + b, 1, tolerance = 1e-12)
 })
@@ -160,7 +163,8 @@ test_that("decomp_from_pairs computes C_ee/C_ec/C_global independently", {
   expect_equal(dec$C_ee, pc$S_ee / pc$W_ee, tolerance = 1e-12)
   expect_equal(dec$C_ec, pc$S_ec / pc$W_ec, tolerance = 1e-12)
   expect_equal(dec$C_global, (pc$S_ee + pc$S_ec) / (pc$W_ee + pc$W_ec),
-               tolerance = 1e-12)
+    tolerance = 1e-12
+  )
   expect_equal(dec$gap, dec$C_ec - dec$C_ee, tolerance = 1e-12)
 })
 
@@ -172,7 +176,7 @@ test_that("decomp_from_pairs NAs only the empty side, not the whole result", {
   dec <- decomp_from_pairs(pc_no_ec)
   expect_equal(dec$C_ee, 0.7, tolerance = 1e-12)
   expect_true(is.na(dec$C_ec))
-  expect_equal(dec$C_global, 0.7, tolerance = 1e-12)  # reduces to C_ee alone
+  expect_equal(dec$C_global, 0.7, tolerance = 1e-12) # reduces to C_ee alone
   expect_true(is.na(dec$gap))
 
   pc_no_ee <- list(W_ee = 0, S_ee = 0, N_ee = 0, W_ec = 10, S_ec = 4, N_ec = 10)

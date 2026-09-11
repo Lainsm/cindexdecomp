@@ -33,9 +33,9 @@
 #' @examples
 #' set.seed(42)
 #' n <- 200
-#' time   <- rexp(n, rate = 0.1)
+#' time <- rexp(n, rate = 0.1)
 #' status <- rbinom(n, 1, 0.6)
-#' risks  <- list(model_a = rnorm(n), model_b = rnorm(n))
+#' risks <- list(model_a = rnorm(n), model_b = rnorm(n))
 #' compare_decompositions(risks, time, status, n_boot = 0)
 #'
 #' @export
@@ -52,17 +52,20 @@ compare_decompositions <- function(risks, time, status,
   if (is.data.frame(risks)) risks <- as.list(risks)
   if (!is.list(risks) || length(risks) == 0L) {
     stop("`risks` must be a non-empty named list or data frame of risk scores.",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
-  if (is.null(names(risks)) || any(!nzchar(names(risks)))) {
+  if (is.null(names(risks)) || !all(nzchar(names(risks)))) {
     stop("`risks` must be fully named; the names label the models.",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
   bad <- vapply(risks, function(r) length(r) != length(time), logical(1))
   if (any(bad)) {
     stop("Every risk score must be the same length as `time` and `status`. ",
-         "Offending: ", paste(names(risks)[bad], collapse = ", "), ".",
-         call. = FALSE)
+      "Offending: ", paste(names(risks)[bad], collapse = ", "), ".",
+      call. = FALSE
+    )
   }
 
   fits <- lapply(risks, function(r) {
@@ -77,7 +80,11 @@ compare_decompositions <- function(risks, time, status,
   names(fits) <- names(risks)
 
   boot_sd <- function(fit, col) {
-    if (is.null(fit$boot)) NA_real_ else stats::sd(fit$boot[, col], na.rm = TRUE)
+    if (is.null(fit$boot)) {
+      NA_real_
+    } else {
+      stats::sd(fit$boot[, col], na.rm = TRUE)
+    }
   }
   # Percentile bounds at the fit's own conf_level. Uses boot_percentile()
   # rather than confint() so building the table never emits one
@@ -127,13 +134,18 @@ compare_decompositions <- function(risks, time, status,
 #' @export
 print.cindex_comparison <- function(x, ...) {
   cat("C-Index Decomposition Comparison\n")
-  cat(sprintf("Weighting: %s | %d model(s) | n_boot = %d\n\n",
-              x$weighting, nrow(x$table), x$n_boot))
+  cat(sprintf(
+    "Weighting: %s | %d model(s) | n_boot = %d\n\n",
+    x$weighting, nrow(x$table), x$n_boot
+  ))
   show <- x$table[, c("model", "ci_ee", "ci_ec", "global_c", "gap")]
   names(show) <- c("model", "C_ee", "C_ec", "C_global", "gap")
   print(show, digits = 4, row.names = FALSE)
   if (x$n_boot == 0) {
-    cat("\nNo bootstrap: sd_* columns are NA. Set n_boot > 0 for uncertainty.\n")
+    cat(
+      "\nNo bootstrap: sd_* columns are NA.",
+      "Set n_boot > 0 for uncertainty.\n"
+    )
   }
   invisible(x)
 }

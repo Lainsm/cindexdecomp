@@ -38,9 +38,9 @@
 #'
 #' @examples
 #' set.seed(42)
-#' time   <- rexp(200, rate = 0.1)
+#' time <- rexp(200, rate = 0.1)
 #' status <- rbinom(200, 1, 0.6)
-#' risk   <- rnorm(200)
+#' risk <- rnorm(200)
 #'
 #' decompose_cindex(time, status, risk)
 #' decompose_cindex(time, status, risk, weights = weights_uno())
@@ -71,13 +71,14 @@ decompose_cindex.default <- function(x, status, risk,
   validate_survival_inputs(time, status, risk)
   validate_weights_and_orientation(weights, higher_is_riskier)
   if (!is.numeric(n_boot) || length(n_boot) != 1L || !is.finite(n_boot) ||
-      n_boot < 0) {
+    n_boot < 0) {
     stop("`n_boot` must be a single non-negative number.", call. = FALSE)
   }
   if (!is.numeric(conf_level) || length(conf_level) != 1L ||
-      conf_level <= 0 || conf_level >= 1) {
+    conf_level <= 0 || conf_level >= 1) {
     stop("`conf_level` must be a single number strictly between 0 and 1.",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
   n_boot <- as.integer(n_boot)
 
@@ -132,11 +133,13 @@ decompose_cindex.formula <- function(x, data = parent.frame(),
   resp <- stats::model.response(mf)
   if (!inherits(resp, "Surv")) {
     stop("The left-hand side of the formula must be a Surv() object.",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
   if (ncol(mf) != 2L) {
     stop("The right-hand side must name exactly one risk score variable.",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
   decompose_cindex.default(
     x = as.numeric(resp[, 1L]),

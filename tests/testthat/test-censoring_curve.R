@@ -3,9 +3,11 @@ test_that("censoring_curve returns a cindex_curve object", {
   cv <- censoring_curve(d$time, d$status, d$risk, n_thresholds = 6)
   expect_s3_class(cv, "cindex_curve")
   expect_s3_class(cv$data, "data.frame")
-  expect_true(all(c("threshold", "censoring", "C_ee", "C_ec", "C_global",
-                    "N_ee", "N_ec", "low_precision", "W_ee",
-                    "W_ec") %in% names(cv$data)))
+  expect_true(all(c(
+    "threshold", "censoring", "C_ee", "C_ec", "C_global",
+    "N_ee", "N_ec", "low_precision", "W_ee",
+    "W_ec"
+  ) %in% names(cv$data)))
 })
 
 test_that("higher_is_riskier is validated, not silently coerced", {
@@ -15,13 +17,16 @@ test_that("higher_is_riskier is validated, not silently coerced", {
   # rejects this; censoring_curve() must match.
   d <- make_test_data(200, seed = 20)
   expect_error(
-    censoring_curve(d$time, d$status, d$risk, higher_is_riskier = 0,
-                    n_thresholds = 4),
+    censoring_curve(d$time, d$status, d$risk,
+      higher_is_riskier = 0,
+      n_thresholds = 4
+    ),
     "TRUE or FALSE"
   )
   expect_error(
     censoring_curve(d$time, d$status, d$risk,
-                    higher_is_riskier = c(TRUE, FALSE), n_thresholds = 4),
+      higher_is_riskier = c(TRUE, FALSE), n_thresholds = 4
+    ),
     "TRUE or FALSE"
   )
 })
@@ -49,8 +54,10 @@ test_that("n_thresholds is NOT validated when probs is supplied directly", {
   # n_thresholds is documented as "ignored if probs is supplied" -- an
   # invalid n_thresholds must not block a call that never uses it.
   d <- make_test_data(200, seed = 20)
-  cv <- censoring_curve(d$time, d$status, d$risk, n_thresholds = -1,
-                        probs = c(0.1, 0.3, 0.5))
+  cv <- censoring_curve(d$time, d$status, d$risk,
+    n_thresholds = -1,
+    probs = c(0.1, 0.3, 0.5)
+  )
   expect_s3_class(cv, "cindex_curve")
 })
 
@@ -115,14 +122,16 @@ test_that("the identity holds at every threshold", {
   # (pair counts). Under weights_uno() the two diverge, so reconstructing
   # from counts would fail here even though the true identity holds.
   d <- make_test_data(300, ties = TRUE, seed = 7)
-  cv <- censoring_curve(d$time, d$status, d$risk, weights = weights_uno(),
-                        n_thresholds = 6)
+  cv <- censoring_curve(d$time, d$status, d$risk,
+    weights = weights_uno(),
+    n_thresholds = 6
+  )
   ok <- !is.na(cv$data$C_ee) & !is.na(cv$data$C_ec)
   expect_true(any(ok))
   for (i in which(ok)) {
     total_w <- cv$data$W_ee[i] + cv$data$W_ec[i]
     rhs <- (cv$data$W_ee[i] * cv$data$C_ee[i] +
-            cv$data$W_ec[i] * cv$data$C_ec[i]) / total_w
+      cv$data$W_ec[i] * cv$data$C_ec[i]) / total_w
     expect_equal(cv$data$C_global[i], rhs, tolerance = 1e-12)
   }
 })
@@ -131,20 +140,29 @@ test_that("W_ee/W_ec equal N_ee/N_ec under a unit weighting but not under IPCW",
   d <- make_test_data(300, ties = TRUE, seed = 22)
   harrell <- censoring_curve(d$time, d$status, d$risk, n_thresholds = 5)
   expect_equal(harrell$data$W_ee, as.numeric(harrell$data$N_ee),
-              tolerance = 1e-12)
+    tolerance = 1e-12
+  )
   expect_equal(harrell$data$W_ec, as.numeric(harrell$data$N_ec),
-              tolerance = 1e-12)
+    tolerance = 1e-12
+  )
 
-  uno <- censoring_curve(d$time, d$status, d$risk, weights = weights_uno(),
-                        n_thresholds = 5)
+  uno <- censoring_curve(d$time, d$status, d$risk,
+    weights = weights_uno(),
+    n_thresholds = 5
+  )
   expect_false(isTRUE(all.equal(uno$data$W_ee, as.numeric(uno$data$N_ee))))
 })
 
 test_that("min_pairs flags rather than filters", {
   d <- make_test_data(300, seed = 8)
-  a <- censoring_curve(d$time, d$status, d$risk, n_thresholds = 6, min_pairs = 1)
-  b <- censoring_curve(d$time, d$status, d$risk, n_thresholds = 6,
-                       min_pairs = 10^9)
+  a <- censoring_curve(
+    d$time, d$status, d$risk,
+    n_thresholds = 6, min_pairs = 1
+  )
+  b <- censoring_curve(d$time, d$status, d$risk,
+    n_thresholds = 6,
+    min_pairs = 10^9
+  )
   expect_equal(nrow(a$data), nrow(b$data))
   expect_true(all(b$data$low_precision))
   expect_false(any(a$data$low_precision))
@@ -154,14 +172,17 @@ test_that("min_pairs flags rather than filters", {
 test_that("censoring increases with the threshold decreasing", {
   d <- make_test_data(300, seed = 9)
   cv <- censoring_curve(d$time, d$status, d$risk, n_thresholds = 8)
-  expect_equal(order(cv$data$censoring, decreasing = TRUE),
-               order(cv$data$threshold))
+  expect_equal(
+    order(cv$data$censoring, decreasing = TRUE),
+    order(cv$data$threshold)
+  )
 })
 
 test_that("the curve accepts alternative weightings", {
   d <- make_test_data(250, seed = 10)
   cv <- censoring_curve(d$time, d$status, d$risk,
-                        weights = weights_uno(), n_thresholds = 4)
+    weights = weights_uno(), n_thresholds = 4
+  )
   expect_equal(cv$weighting, "Uno (IPCW)")
 })
 

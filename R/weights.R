@@ -61,7 +61,9 @@ weights_uno <- function(tau = NULL) {
     paste0("Uno (IPCW, tau = ", fmt_tau(tau), ")")
   }
   new_cindex_weights(nm, function(t, G) {
-    if (!is.null(tau) && t > tau) return(0)
+    if (!is.null(tau) && t > tau) {
+      return(0)
+    }
     1 / G(t)^2
   })
 }

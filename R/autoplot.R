@@ -32,11 +32,15 @@ dumbbell_plot <- function(tab, weighting, dark, conf_level = NULL) {
     any(vapply(tab[ci_cols], function(col) any(is.finite(col)), logical(1)))
 
   gg <- ggplot2::ggplot(tab) +
-    ggplot2::geom_vline(xintercept = 0.5, linetype = "dashed",
-                        colour = p$fg, linewidth = 0.6) +
+    ggplot2::geom_vline(
+      xintercept = 0.5, linetype = "dashed",
+      colour = p$fg, linewidth = 0.6
+    ) +
     ggplot2::geom_segment(
-      ggplot2::aes(x = .data$ci_ee, xend = .data$ci_ec,
-                   y = .data$model, yend = .data$model),
+      ggplot2::aes(
+        x = .data$ci_ee, xend = .data$ci_ec,
+        y = .data$model, yend = .data$model
+      ),
       colour = p$grid, linewidth = 2
     )
 
@@ -47,19 +51,25 @@ dumbbell_plot <- function(tab, weighting, dark, conf_level = NULL) {
     # zero-width bar at its own position instead of being dropped. Filter
     # each side's data explicitly so one model's unstable CI doesn't leave
     # a stray marker next to the others'.
-    ee_tab <- tab[is.finite(tab$ci_ee_lo) & is.finite(tab$ci_ee_hi), , drop = FALSE]
-    ec_tab <- tab[is.finite(tab$ci_ec_lo) & is.finite(tab$ci_ec_hi), , drop = FALSE]
+    ee_ok <- is.finite(tab$ci_ee_lo) & is.finite(tab$ci_ee_hi)
+    ec_ok <- is.finite(tab$ci_ec_lo) & is.finite(tab$ci_ec_hi)
+    ee_tab <- tab[ee_ok, , drop = FALSE]
+    ec_tab <- tab[ec_ok, , drop = FALSE]
     gg <- gg +
       ggplot2::geom_errorbar(
         data = ee_tab,
-        ggplot2::aes(xmin = .data$ci_ee_lo, xmax = .data$ci_ee_hi,
-                     y = .data$model),
+        ggplot2::aes(
+          xmin = .data$ci_ee_lo, xmax = .data$ci_ee_hi,
+          y = .data$model
+        ),
         orientation = "y", width = 0.12, colour = p$ee, linewidth = 0.7
       ) +
       ggplot2::geom_errorbar(
         data = ec_tab,
-        ggplot2::aes(xmin = .data$ci_ec_lo, xmax = .data$ci_ec_hi,
-                     y = .data$model),
+        ggplot2::aes(
+          xmin = .data$ci_ec_lo, xmax = .data$ci_ec_hi,
+          y = .data$model
+        ),
         orientation = "y", width = 0.12, colour = p$ec, linewidth = 0.7
       )
   }
@@ -70,28 +80,41 @@ dumbbell_plot <- function(tab, weighting, dark, conf_level = NULL) {
     NULL
   }
   subtitle <- paste(
-    c(paste0("Weighting: ", weighting), ci_txt,
-      "dashed line marks chance (0.50)"),
+    c(
+      paste0("Weighting: ", weighting), ci_txt,
+      "dashed line marks chance (0.50)"
+    ),
     collapse = " \u00b7 "
   )
 
   gg +
     ggplot2::geom_point(
-      ggplot2::aes(x = .data$ci_ee, y = .data$model,
-                   colour = "Event-Event"), size = 4.5
+      ggplot2::aes(
+        x = .data$ci_ee, y = .data$model,
+        colour = "Event-Event"
+      ),
+      size = 4.5
     ) +
     ggplot2::geom_point(
-      ggplot2::aes(x = .data$ci_ec, y = .data$model,
-                   colour = "Event-Censored"), size = 4.5
+      ggplot2::aes(
+        x = .data$ci_ec, y = .data$model,
+        colour = "Event-Censored"
+      ),
+      size = 4.5
     ) +
     ggplot2::geom_point(
-      ggplot2::aes(x = .data$global_c, y = .data$model,
-                   colour = "Global"), size = 3.5, shape = 18
+      ggplot2::aes(
+        x = .data$global_c, y = .data$model,
+        colour = "Global"
+      ),
+      size = 3.5, shape = 18
     ) +
     ggplot2::scale_colour_manual(
       name = NULL,
-      values = c("Event-Event" = p$ee, "Event-Censored" = p$ec,
-                 "Global" = p$global),
+      values = c(
+        "Event-Event" = p$ee, "Event-Censored" = p$ec,
+        "Global" = p$global
+      ),
       breaks = c("Event-Event", "Global", "Event-Censored")
     ) +
     ggplot2::labs(
@@ -106,7 +129,8 @@ dumbbell_plot <- function(tab, weighting, dark, conf_level = NULL) {
 #' @export
 autoplot.cindex_comparison <- function(object, dark = FALSE, ...) {
   dumbbell_plot(object$table, object$weighting, dark,
-               conf_level = object$conf_level)
+    conf_level = object$conf_level
+  )
 }
 
 #' @rdname autoplot.cindexdecomp
@@ -123,11 +147,16 @@ autoplot.cindex_decomp <- function(object, dark = FALSE, ...) {
     ci_ec_lo = ec_ci[1], ci_ec_hi = ec_ci[2],
     stringsAsFactors = FALSE
   )
-  gg <- dumbbell_plot(tab, object$weighting, dark, conf_level = object$conf_level)
+  gg <- dumbbell_plot(
+    tab, object$weighting, dark,
+    conf_level = object$conf_level
+  )
   # A single decomposition has no real category to name its row with --
   # "model" above is an internal placeholder, not a label worth showing.
-  gg + ggplot2::theme(axis.text.y = ggplot2::element_blank(),
-                      axis.ticks.y = ggplot2::element_blank())
+  gg + ggplot2::theme(
+    axis.text.y = ggplot2::element_blank(),
+    axis.ticks.y = ggplot2::element_blank()
+  )
 }
 
 #' @rdname autoplot.cindexdecomp
@@ -142,12 +171,16 @@ autoplot.cindex_curve <- function(object, dark = FALSE, ...) {
       # C_global is a weighted average of C_ee and C_ec, so a negative gap
       # (C_ec < C_ee) makes C_global < C_ee -- pmin/pmax keep the ribbon
       # from drawing inverted in that case.
-      ggplot2::aes(ymin = pmin(.data$C_ee, .data$C_global),
-                   ymax = pmax(.data$C_ee, .data$C_global)),
+      ggplot2::aes(
+        ymin = pmin(.data$C_ee, .data$C_global),
+        ymax = pmax(.data$C_ee, .data$C_global)
+      ),
       fill = p$ee, alpha = 0.10, na.rm = TRUE
     ) +
-    ggplot2::geom_hline(yintercept = 0.5, linetype = "dashed",
-                        colour = p$fg, linewidth = 0.6) +
+    ggplot2::geom_hline(
+      yintercept = 0.5, linetype = "dashed",
+      colour = p$fg, linewidth = 0.6
+    ) +
     ggplot2::geom_line(
       ggplot2::aes(y = .data$C_ec, colour = "Event-Censored"),
       linewidth = 1, na.rm = TRUE
@@ -161,16 +194,25 @@ autoplot.cindex_curve <- function(object, dark = FALSE, ...) {
       linewidth = 1, na.rm = TRUE
     ) +
     ggplot2::geom_point(
-      ggplot2::aes(y = .data$C_ec, colour = "Event-Censored",
-                   alpha = .data$precision), size = 2.4, na.rm = TRUE
+      ggplot2::aes(
+        y = .data$C_ec, colour = "Event-Censored",
+        alpha = .data$precision
+      ),
+      size = 2.4, na.rm = TRUE
     ) +
     ggplot2::geom_point(
-      ggplot2::aes(y = .data$C_global, colour = "Global",
-                   alpha = .data$precision), size = 2.4, na.rm = TRUE
+      ggplot2::aes(
+        y = .data$C_global, colour = "Global",
+        alpha = .data$precision
+      ),
+      size = 2.4, na.rm = TRUE
     ) +
     ggplot2::geom_point(
-      ggplot2::aes(y = .data$C_ee, colour = "Event-Event",
-                   alpha = .data$precision), size = 2.4, na.rm = TRUE
+      ggplot2::aes(
+        y = .data$C_ee, colour = "Event-Event",
+        alpha = .data$precision
+      ),
+      size = 2.4, na.rm = TRUE
     ) +
     # Low-precision points are drawn faintly, never removed.
     ggplot2::scale_alpha_manual(
@@ -178,16 +220,20 @@ autoplot.cindex_curve <- function(object, dark = FALSE, ...) {
     ) +
     ggplot2::scale_colour_manual(
       name = NULL,
-      values = c("Event-Event" = p$ee, "Event-Censored" = p$ec,
-                 "Global" = p$global),
+      values = c(
+        "Event-Event" = p$ee, "Event-Censored" = p$ec,
+        "Global" = p$global
+      ),
       breaks = c("Event-Event", "Global", "Event-Censored")
     ) +
     ggplot2::scale_x_continuous(labels = scales::percent_format(accuracy = 1)) +
     ggplot2::labs(
       x = "Cohort censoring rate", y = "Concordance index",
       title = "Concordance under increasing censoring",
-      subtitle = paste0("Weighting: ", object$weighting,
-                        " \u00b7 shaded band spans C_ee to the global C-index")
+      subtitle = paste0(
+        "Weighting: ", object$weighting,
+        " \u00b7 shaded band spans C_ee to the global C-index"
+      )
     ) +
     theme_cindex(dark = dark)
 }

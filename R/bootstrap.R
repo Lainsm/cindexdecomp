@@ -20,7 +20,8 @@
 bootstrap_decomp <- function(time, status, risk, weights, n_boot) {
   n <- length(time)
   out <- matrix(
-    NA_real_, nrow = n_boot, ncol = 4L,
+    NA_real_,
+    nrow = n_boot, ncol = 4L,
     dimnames = list(NULL, c("C_ee", "C_ec", "C_global", "gap"))
   )
   for (b in seq_len(n_boot)) {
@@ -55,10 +56,14 @@ bootstrap_decomp <- function(time, status, risk, weights, n_boot) {
 #' @keywords internal
 #' @noRd
 boot_percentile <- function(boot, col, level) {
-  if (is.null(boot)) return(c(NA_real_, NA_real_))
+  if (is.null(boot)) {
+    return(c(NA_real_, NA_real_))
+  }
   a <- (1 - level) / 2
-  stats::quantile(boot[, col], probs = c(a, 1 - a), na.rm = TRUE,
-                  names = FALSE)
+  stats::quantile(boot[, col],
+    probs = c(a, 1 - a), na.rm = TRUE,
+    names = FALSE
+  )
 }
 
 #' Bootstrap confidence intervals for a concordance decomposition
@@ -71,9 +76,9 @@ boot_percentile <- function(boot, col, level) {
 #' @return A matrix of percentile bounds, one row per quantity.
 #' @examples
 #' set.seed(1)
-#' time   <- rexp(150, rate = 0.1)
+#' time <- rexp(150, rate = 0.1)
 #' status <- rbinom(150, 1, 0.6)
-#' risk   <- rnorm(150)
+#' risk <- rnorm(150)
 #' fit <- decompose_cindex(time, status, risk, n_boot = 50)
 #' confint(fit)
 #' @export
@@ -89,17 +94,23 @@ confint.cindex_decomp <- function(object,
   }
   if (is.null(level)) level <- object$conf_level
   if (!is.numeric(level) || length(level) != 1L ||
-      level <= 0 || level >= 1) {
+    level <= 0 || level >= 1) {
     stop("`level` must be a single number strictly between 0 and 1.",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
   parm <- match.arg(parm, c("C_ee", "C_ec", "C_global", "gap"),
-                    several.ok = TRUE)
+    several.ok = TRUE
+  )
   n_valid <- sum(stats::complete.cases(object$boot))
   if (n_valid < 0.9 * nrow(object$boot)) {
     warning(
       sprintf(
-        "Only %d of %d bootstrap replicates were usable (%.0f%%). Intervals are based on the usable ones; with few events, consider raising n_boot.",
+        paste(
+          "Only %d of %d bootstrap replicates were usable (%.0f%%).",
+          "Intervals are based on the usable ones; with few events,",
+          "consider raising n_boot."
+        ),
         n_valid, nrow(object$boot), 100 * n_valid / nrow(object$boot)
       ),
       call. = FALSE
