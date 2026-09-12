@@ -1,0 +1,422 @@
+/*-- scss:defaults --*/
+
+// System font stack only. Google Fonts would need the network, and this deck
+// has to run from a local file on a venue laptop.
+$font-family-sans-serif: -apple-system, BlinkMacSystemFont, "Segoe UI",
+  "Helvetica Neue", Arial, "Noto Sans", sans-serif !default;
+$font-family-monospace: "SFMono-Regular", Menlo, Consolas,
+  "Liberation Mono", monospace !default;
+
+// Mirrors cindexdecomp's IBM colourblind-safe palette, dark variant. The two
+// pair-type accents are identical in light and dark; only the neutrals move.
+$cd-ee: #dc267f;
+$cd-ec: #648fff;
+$cd-fg: #f8f8f2;
+$cd-bg: #282a36;
+$cd-muted: #9aa0b8;
+$cd-rule: #3a3c4e;
+$cd-code-bg: #21222c;
+
+$body-bg: $cd-bg;
+$body-color: $cd-fg;
+$link-color: $cd-ec;
+$selection-bg: rgba($cd-ee, 0.30);
+
+$presentation-font-size-root: 34px;
+$presentation-heading-color: $cd-fg;
+$presentation-heading-font-weight: 700;
+$presentation-h1-font-size: 2.0em;
+$presentation-h2-font-size: 1.32em;
+$presentation-slide-text-align: left;
+
+/*-- scss:rules --*/
+
+.reveal {
+  letter-spacing: -0.005em;
+}
+
+.reveal .slides section {
+  // Slide titles sit on a hairline rule; keeps dense slides from feeling
+  // like a wall of text.
+  h2 {
+    padding-bottom: 0.28em;
+    border-bottom: 2px solid $cd-rule;
+    margin-bottom: 0.7em;
+    letter-spacing: -0.015em;
+  }
+}
+
+// ---- Section dividers -------------------------------------------------
+
+.reveal section.section-break {
+  h1 {
+    border: none;
+    letter-spacing: -0.03em;
+  }
+
+  &::after {
+    content: "";
+    display: block;
+    width: 4.5rem;
+    height: 5px;
+    margin-top: 0.6rem;
+    background: $cd-ee;
+  }
+}
+
+// ---- The single large number ------------------------------------------
+
+.big-stat {
+  font-size: 3.4em;
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+  margin: 0.24em 0 0.1em;
+  color: $cd-fg;
+
+  &.ee-colour {
+    color: $cd-ee;
+  }
+}
+
+// ---- The punchline callout --------------------------------------------
+
+.highlight-q {
+  border-left: 5px solid $cd-ee;
+  padding: 0.42em 0 0.42em 0.85em;
+  margin-top: 0.85em;
+  background: rgba($cd-ee, 0.13);
+  font-size: 1.03em;
+}
+
+// ---- Pair-type tags ---------------------------------------------------
+
+.ee-tag,
+.ec-tag {
+  display: inline-block;
+  margin-top: 0.7em;
+  padding: 0.16em 0.7em;
+  border-radius: 999px;
+  font-size: 0.72em;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+
+.ee-tag {
+  background: $cd-ee;
+}
+
+.ec-tag {
+  background: $cd-ec;
+}
+
+// ---- "You cannot escape this by..." rows -------------------------------
+
+.escape-row {
+  border-left: 3px solid $cd-rule;
+  padding: 0.1em 0 0.1em 0.85em;
+  margin-bottom: 0.72em;
+  font-size: 0.92em;
+
+  strong {
+    color: $cd-ee;
+  }
+}
+
+// ---- Closing slide -----------------------------------------------------
+
+.takeaway {
+  font-size: 0.95em;
+
+  p {
+    margin: 0.42em 0;
+  }
+
+  strong:first-child {
+    color: $cd-ee;
+  }
+}
+
+.install {
+  margin-top: 1.1em;
+  padding-top: 0.6em;
+  border-top: 2px solid $cd-rule;
+  font-size: 0.78em;
+  color: $cd-muted;
+
+  code {
+    color: $cd-fg;
+  }
+}
+
+// ---- Tables ------------------------------------------------------------
+
+.reveal table {
+  font-size: 0.82em;
+  border-collapse: collapse;
+  margin: 0.2em 0;
+  font-variant-numeric: tabular-nums;
+
+  th {
+    border-bottom: 2px solid $cd-fg;
+    padding: 0.34em 0.85em;
+    font-weight: 700;
+  }
+
+  td {
+    border-bottom: 1px solid $cd-rule;
+    padding: 0.3em 0.85em;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+}
+
+// ---- Code --------------------------------------------------------------
+
+.reveal pre.sourceCode,
+.reveal div.sourceCode {
+  background: $cd-code-bg;
+  border: 1px solid $cd-rule;
+  border-radius: 4px;
+  font-size: 0.78em;
+  overflow-x: hidden;
+
+  // belt and braces: if a block ever does overflow, the bar must not be a
+  // bright strip across a dark slide
+  &::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $cd-rule;
+    border-radius: 3px;
+  }
+}
+
+.reveal code {
+  font-family: $font-family-monospace;
+}
+
+.reveal p code,
+.reveal li code {
+  color: $cd-ee;
+  background: rgba($cd-ee, 0.16);
+  padding: 0.06em 0.28em;
+  border-radius: 3px;
+}
+
+// Tables can carry a code span in every cell; magenta on all of them reads as
+// a highlighted block rather than as emphasis.
+.reveal td code,
+.reveal th code {
+  color: $cd-fg;
+  background: rgba($cd-fg, 0.09);
+  padding: 0.06em 0.28em;
+  border-radius: 3px;
+}
+
+// ---- Misc --------------------------------------------------------------
+
+.reveal blockquote {
+  border-left: 4px solid $cd-ec;
+  background: rgba($cd-ec, 0.13);
+  box-shadow: none;
+  font-style: normal;
+  padding: 0.5em 0.9em;
+  width: 100%;
+}
+
+// Footer sits bottom-right on every slide; the slide number moves to the
+// left so the two never overlap.
+// Quarto ships its own `.reveal .footer` rule (full width, centred) at equal
+// specificity and later in the cascade, so this has to outrank it explicitly.
+.reveal .footer,
+.reveal .footer.footer-default {
+  left: auto !important;
+  right: 26px !important;
+  bottom: 12px !important;
+  width: auto !important;
+  max-width: 45%;
+  margin: 0 !important;
+  text-align: right !important;
+  font-size: 0.4em;
+  color: $cd-muted;
+  opacity: 0.85;
+
+  code {
+    color: $cd-muted;
+    background: transparent;
+    padding: 0;
+    font-size: 1em;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+.reveal .slide-number {
+  color: $cd-muted;
+  background: transparent;
+  font-size: 0.5em;
+  // clear of reveal's menu button, which sits at the bottom-left corner
+  left: 62px !important;
+  right: auto !important;
+  bottom: 12px !important;
+}
+
+.reveal .columns {
+  gap: 2rem;
+}
+
+// With auto-stretch off, figures render at their natural size; cap them so a
+// 2x-DPI export can never overflow the slide.
+.reveal .slides img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+// ---- Centred blocks (tables and figures) --------------------------------
+
+.centre-table {
+  display: flex;
+  justify-content: center;
+
+  table {
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+// ---- Label above a big-stat number --------------------------------------
+
+.stat-name {
+  display: inline-block;
+  font-family: $font-family-monospace;
+  font-size: 0.62em;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: $cd-muted;
+  margin-bottom: -0.15em;
+
+  &.ee-colour {
+    color: $cd-ee;
+    opacity: 0.85;
+  }
+}
+
+// ---- Numbered steps (how Harrell's C is computed) -----------------------
+
+.steps {
+  margin-top: 0.2em;
+}
+
+.step {
+  border-left: 3px solid $cd-rule;
+  padding: 0.06em 0 0.06em 0.85em;
+  margin-bottom: 0.55em;
+  font-size: 0.88em;
+
+  strong {
+    color: $cd-ec;
+  }
+}
+
+// ---- The pooling distinction --------------------------------------------
+
+.pool {
+  color: #ffffff;
+  background: $cd-ee;
+  font-weight: 700;
+  padding: 0.02em 0.34em;
+  border-radius: 3px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+// ---- Closing checklist ---------------------------------------------------
+
+.checklist {
+  margin-top: 0.35em;
+}
+
+.check {
+  position: relative;
+  padding: 0.34em 0 0.34em 2.1em;
+  border-bottom: 1px solid $cd-rule;
+  font-size: 0.88em;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  // empty tick box: the audience has not done these yet
+  &::before {
+    content: "";
+    position: absolute;
+    left: 0.4em;
+    top: 0.6em;
+    width: 0.8em;
+    height: 0.8em;
+    border: 2px solid $cd-ee;
+    border-radius: 3px;
+  }
+
+  // Pandoc wraps both spans in a single paragraph, so the paragraph has to be
+  // the flex container: putting display:flex on .check itself would leave one
+  // child and the two spans would stay inline.
+  > p {
+    display: flex;
+    align-items: baseline;
+    gap: 1em;
+    width: 100%;
+    margin: 0;
+  }
+}
+
+.do {
+  flex: 1 1 auto;
+}
+
+.how {
+  flex: 0 0 auto;
+  font-family: $font-family-monospace;
+  font-size: 0.78em;
+  color: $cd-muted;
+  text-align: right;
+  white-space: nowrap;
+}
+
+// `.reveal p code` is (0,1,2); `.how code` alone is only (0,1,1) and loses,
+// so the function names kept the magenta prose-code styling.
+.reveal .check .how code {
+  color: $cd-muted;
+  background: transparent;
+  padding: 0;
+  font-size: 1em;
+}
+
+// ---- Enlarged display maths ----------------------------------------------
+
+.big-math {
+  .MathJax,
+  mjx-container,
+  .math.display {
+    font-size: 1.35em !important;
+  }
+
+  mjx-container[display="true"] {
+    margin: 0.3em 0 !important;
+  }
+}

@@ -1,1 +1,7 @@
+# Rendered output: dev documents are built locally, never committed.
 *.html
+
+# Quarto / knitr build products.
+*_cache/
+*_files/
+.quarto/
