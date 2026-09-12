@@ -40,7 +40,7 @@ knitr:
     warning: false
     message: false
     dev: ragg_png
-bibliography: /home/malik/Documents/uni/cindexdecomp/cindexdecomp.bib
+bibliography: ../../cindexdecomp.bib
 ---
 
 ```{r}
@@ -284,15 +284,15 @@ task_plot <- function(stage = 3) {
 
 ## The number we all report {.smaller}
 
-85% of ML studies that report a C-index report it as a single number [@odonnellSystematicReviewMachine2025]
+In a systematic review of machine learning for cancer survival analysis, **85%**
+of studies reported the C-index, most of them as a single pooled number
+[@odonnellSystematicReviewMachine2025].
 
 ::: {.big-stat}
 C = 0.65
 :::
 
 Read as: *the probability the model ranks a random pair correctly.*
-
-However there is a movement that the c-index might not be the best metric to use in survival analysis [@alabdallahConcordanceIndexDecomposition2024; @blancheCindexNotProper2019;@sierraCindexMultiverse2025]
 
 ::: {.fragment .highlight-q}
 **Which pairs?**
@@ -314,17 +314,67 @@ minutes is an answer to "which pairs".
 | **C-index** | does it get the *ordering* right? |
 
 ::: {.fragment}
-The C-index dominates reporting practice, often as the only number quoted.
+Every one of these is better suited to some questions than the C-index is.
+**They are also barely used.** In that review, the C-index was not just the
+most common metric: for most studies it was the *only* one reported
+[@odonnellSystematicReviewMachine2025].
 :::
 
 ::: {.fragment .highlight-q}
-This talk is not "C is the wrong metric."<br>
-It is: **the pooled form of C hides its own composition.**
+So this talk is not "C is the wrong metric". It is: the number that 85% of the
+field reports **on its own** hides its own composition, and almost nobody looks.
 :::
 
 ::: {.notes}
-Scope-setting. Costs 40 seconds and keeps Q&A on topic -- without it someone
-spends your question time asking why you ignored calibration.
+Scope-setting, and it earns the rest of the talk: the reason to spend fifteen
+minutes on one metric is that for most published models it is the only
+evidence on offer. Without this slide someone spends your question time
+asking why you ignored calibration.
+:::
+
+## You are not the first to be suspicious {.smaller}
+
+There is a live argument in the methods literature that the C-index is asked
+to carry more than it can. Four distinct complaints:
+
+::: {.steps}
+::: {.step}
+**It is not a proper scoring rule.** For $t$-year predicted risks, a model
+that is *not* the true model can score higher than the true one
+[@blancheCindexNotProper2019].
+:::
+
+::: {.step}
+**It is under-specified in practice.** Several inequivalent estimators travel
+under one name, and the choice often goes unreported, which leaves room for
+C-hacking [@sonabendAvoidingChackingWhen2022].
+:::
+
+::: {.step}
+**Defensible choices disagree.** Walk the space of reasonable analytic
+choices and the number moves materially: a C-index multiverse
+[@sierraCindexMultiverse2025].
+:::
+
+::: {.step}
+**It is misaligned with what people claim.** The metric reported often does
+not match the modelling objective stated in the same paper
+[@lillelundPositionStopChasing2025].
+:::
+:::
+
+::: {.fragment .highlight-q}
+This talk is a fifth complaint, and it is the most basic one: **the pooled
+index hides its own composition** [@alabdallahConcordanceIndexDecomposition2024].
+:::
+
+::: {.notes}
+Two purposes. First, a student audience should hear that scepticism about the
+C-index is mainstream methods work, not a personal hobby-horse. Second, it
+credits Alabdallah et al., whose paper introduced the decomposition: say out
+loud that the decomposition is theirs and that the contribution here is a
+tested, general R implementation of it. Claiming the method would be the one
+thing this room would not forgive.
 :::
 
 ## Censoring is a partial outcome {.smaller}
@@ -385,7 +435,7 @@ task_plot(3)
 Different questions, and C averages them into one score.
 :::
 
-## The mix is set by your study, not your model {.smaller}
+## The mix is set by your study, not your model {.smaller .centred}
 
 ::: {.columns}
 ::: {.column width="50%"}
@@ -427,62 +477,65 @@ one slide, it should be the previous one; if they remember two, this one.
 
 ## Five published cohorts, five Cox models {.smaller}
 
-::: {.centre-table}
 ```{r}
-#| label: cohort-table
-tab <- data.frame(
-  Cohort = ladder$cohort,
-  Setting = ladder$disease,
-  Years = ladder$years,
-  n = format(ladder$n, big.mark = ","),
-  Censoring = pc(ladder$cens)
+#| label: cohort-list
+#| output: asis
+# Rendered as a list rather than a table: five rows of six columns forced the
+# type down to a size that does not read from the back of a room.
+covars <- c(
+  lung      = "age, sex, ECOG performance score",
+  colon     = "age, sex, obstruction, nodes, differentiation, extent, treatment",
+  gbsg      = "age, menopause, size, grade, nodes, PgR, ER, hormone therapy",
+  rotterdam = "the gbsg covariates, plus chemotherapy",
+  flchain   = "age, sex, kappa, lambda, MGUS"
 )
-knitr::kable(tab, align = "lllrr")
+for (i in seq_len(nrow(ladder))) {
+  r <- ladder[i, ]
+  cat(sprintf(
+    "::: {.cohort}\n[%s]{.co-name} [%s, %s]{.co-what}\n\n[n = %s  ·  %s censored]{.co-n} [%s]{.co-cov}\n:::\n\n",
+    r$cohort, r$disease, r$years, format(r$n, big.mark = ","),
+    pc(r$cens), covars[[r$cohort]]
+  ))
+}
 ```
-:::
 
 ::: {.fragment .highlight-q}
 Unrelated diseases. Different covariates. Different decades.
 :::
 
 ::: {.notes}
-The censoring ordering is deliberate but goes unsaid on the slide: mention
-verbally that the rows are sorted by censoring rate and that this is the one
-thing varying systematically across them.
+Say verbally that the rows are ordered by censoring rate, and that this is the
+one thing varying systematically across them. Also say, once, that these are
+Cox proportional-hazards models on complete cases and that the C-indices are
+apparent rather than cross-validated: n far exceeds p in all five, so the
+optimism is small, and it cannot manufacture the pattern because it would
+inflate both halves of the split together.
 :::
 
-## How Harrell's C is computed {.smaller}
+## So how is that number actually built? {.smaller}
 
-::: {.steps}
-::: {.step}
-**1. Form every comparable pair.**
-Two patients are comparable when you can say which failed first. Both
-censored, or the censored one lost to follow-up too early: not comparable,
-and dropped.
-:::
+Take two patients. If you can tell which of them failed first, ask the model
+which one it thought was the riskier bet. It either got that right or it did
+not.
 
-::: {.step}
-**2. Score each pair.**
-`1` if the model gives the higher risk to the one who failed first, `0.5` if
-their risks tie, `0` otherwise.
-:::
-
-::: {.step}
-**3. Average over the pairs.**
-Every comparable pair carries **equal weight**.
-:::
+::: {.fragment}
+Do that for every pair you can order, and count how often the model was right.
+That proportion is Harrell's C. A tie counts as half a success; pairs you
+cannot order at all, because both were still alive when you lost sight of
+them, never enter the count.
 :::
 
 ::: {.fragment .highlight-q}
-That equal weight is the whole story: `w = 1` for a pair of deaths and `w = 1`
-for a death against a survivor, however differently hard those two
-comparisons are.
+And here is the part that matters for the rest of this talk: **every pair that
+survives that filter counts exactly the same.** A pair of deaths and a death
+measured against a survivor both carry a weight of one, however differently
+hard those two comparisons are.
 :::
 
 ::: {.notes}
-Keep this to about 45 seconds. It exists so that C_global on the next slide
-is not a black box, and so the w = 1 in the identity later lands as a choice
-rather than as notation.
+About 45 seconds, told rather than recited. It exists so C_global on the next
+slide is not a black box, and so that w = 1 in the identity later lands as a
+choice somebody made rather than as notation.
 :::
 
 ## Read the global column first {.smaller}
@@ -836,3 +889,10 @@ practice and explained in `vignette("cindexdecomp")`.
 
 All Cox, all complete cases, `n_boot = `r N_BOOT``, `set.seed(2026)`.
 All five ship with the `survival` package.
+
+## References {.smaller visibility="uncounted"}
+
+::: {.refs-slide}
+::: {#refs}
+:::
+:::

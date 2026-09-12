@@ -33,7 +33,7 @@ therefore useful signal on which objections the paper must pre-empt.
 |---|---|
 | Audience | Students and early-career peers; mixed statistical depth |
 | Slot | 15 min talk + 5 min Q&A |
-| Slide budget | 18 counted slides, plus backups reachable only from Q&A |
+| Slide budget | 19 counted slides, plus backups and a references slide |
 | Toolchain | Quarto `revealjs` (`.qmd`) |
 | Appearance | Dark ground (`#282A36`), package accent colours unchanged |
 | Figures | Rendered live from packaged `survival` cohorts, seeded |
@@ -89,7 +89,26 @@ will spot them. Slide 8 must therefore lead with the flat `C_ee` column and
 the rising `C_global` column, and treat the gap as a derived consequence
 rather than as the trend being asserted.
 
-### 3.2 Recorded decision: the censoring curve is cut
+### 3.2 Prior art, and what this talk is allowed to claim
+
+The decomposition is **not novel**: it is introduced in Alabdallah, Ohlsson,
+Pashami and Rögnvaldsson (2024), *Artificial Intelligence in Medicine*. The
+contribution here is a tested, general R implementation, exactly as recorded
+in `2026-08-25-cindex-decomposition-design.md`.
+
+Slide 4 must therefore credit that paper out loud. Claiming the method in
+front of a methods-literate room would be the one thing not forgiven, and the
+credit costs nothing: it places the talk inside a live argument rather than
+outside it.
+
+That argument has four other strands the deck now names, each with its own
+citation: not a proper scoring rule (Blanche et al. 2019), under-specified in
+practice and therefore C-hackable (Sonabend et al. 2022), a multiverse of
+defensible analytic choices (Sierra et al. 2025), and misalignment between the
+metric reported and the objective stated (Lillelund et al. 2025). The 85%
+figure motivating the whole talk is from O'Donnell et al. (2025).
+
+### 3.3 Recorded decision: the censoring curve is cut
 
 `censoring_curve()` and its figure do not appear in the deck, not even as a
 backup.
@@ -273,6 +292,15 @@ the next cut after that.
 - `navigation-mode: linear`: the `#` section breaks nest their slides as
   vertical stacks, so without this a right-arrow during the talk skips a
   whole section's contents.
+- **Bibliography.** `bibliography: ../../cindexdecomp.bib`, kept relative: it
+  was briefly an absolute path under one user's home, which breaks for anyone
+  else and if the repo ever moves. `cindexdecomp.bib` sits at the package root
+  and is now in `.Rbuildignore`, without which `R CMD check` reports a
+  non-standard file at top level on submission.
+- **The reference list needs its own slide.** Pandoc appends `#refs` to
+  whatever the last slide happens to be, which dumped six entries onto the
+  final backup slide. An explicit `::: {#refs}` on a `References` slide at the
+  end controls where it lands.
 - A footer carrying the canonical CRAN reference
   (`CRAN.R-project.org/package=cindexdecomp`) sits bottom-right on every
   slide, with the slide number moved to the bottom-left and clear of
@@ -290,7 +318,28 @@ the next cut after that.
 - Slide 5's timeline figure is bespoke to the talk and is the one figure not
   produced by an exported package function.
 
-## 8. Open questions
+## 8. Recorded methodological caveat: apparent discrimination
+
+Every C-index in the deck is **apparent**: each Cox model is fitted and
+evaluated on the same cohort, with no cross-validation or bootstrap optimism
+correction. "Did you cross-validate?" is a likely question from this room and
+the honest answer is no.
+
+Why the argument survives it, and the answer to give:
+
+- n greatly exceeds p in all five (167/3, 888/7, 686/8, 2982/9, 7871/5), so
+  optimism is small.
+- More importantly, optimism inflates `C_ee` and `C_ec` **together**. It
+  shifts the level, not the split, so it cannot manufacture either the flat
+  `C_ee` column or the rising `C_global` column, which are the two claims the
+  talk actually makes.
+
+If a bulletproof version is ever wanted, replace each `predict(m, type = "lp")`
+with out-of-fold linear predictors from k-fold cross-validation. That changes
+the numbers slightly and multiplies the cached compute by k; it does not
+change the shape of the result.
+
+## 9. Open questions
 
 None blocking. To settle during rehearsal:
 

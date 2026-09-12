@@ -420,3 +420,82 @@ $presentation-slide-text-align: left;
     margin: 0.3em 0 !important;
   }
 }
+
+// ---- Fully centred slide -------------------------------------------------
+
+.reveal section.centred {
+  text-align: center;
+
+  h2 {
+    text-align: center;
+  }
+
+  .columns {
+    justify-content: center;
+  }
+
+  .ee-tag,
+  .ec-tag {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  // the callout keeps its left accent bar but centres its text
+  .highlight-q {
+    text-align: center;
+    padding-left: 0.85em;
+    padding-right: 0.85em;
+  }
+}
+
+// ---- Cohort list (replaces the six-column table) -------------------------
+
+.cohort {
+  padding: 0.24em 0 0.24em 0.85em;
+  border-left: 3px solid $cd-rule;
+  margin-bottom: 0.42em;
+
+  p {
+    margin: 0;
+  }
+}
+
+.co-name {
+  font-family: $font-family-monospace;
+  font-weight: 700;
+  font-size: 1.02em;
+  color: $cd-ee;
+  margin-right: 0.5em;
+}
+
+.co-what {
+  font-size: 0.86em;
+}
+
+.co-n {
+  display: inline-block;
+  min-width: 12.5em;
+  font-size: 0.76em;
+  color: $cd-fg;
+  font-variant-numeric: tabular-nums;
+}
+
+.co-cov {
+  font-size: 0.76em;
+  color: $cd-muted;
+}
+
+// ---- Reference list ------------------------------------------------------
+
+.refs-slide {
+  font-size: 0.5em;
+  line-height: 1.35;
+
+  .csl-entry {
+    margin-bottom: 0.5em;
+  }
+
+  a {
+    color: $cd-ec;
+  }
+}

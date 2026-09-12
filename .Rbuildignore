@@ -14,3 +14,4 @@
 ^cran-comments\.md$
 ^\.lintr\.R$
 ^\.lintr$
+^cindexdecomp\.bib$
