@@ -732,11 +732,14 @@ deliver it deliberately, not defensively.
 
 Any concordance index that averages over comparable pairs
 
-$$C_w = \frac{\sum_{ij} w_{ij}\,c_{ij}}{\sum_{ij} w_{ij}}$$
+<!-- Both formulas are SVGs from formulas/render.cjs rather than MathJax: the
+split carries the deck's pair-type colours, and the two need one font and one
+scale. Each width is the SVG's natural width (printed by render.cjs) x 1.8. -->
+![](formulas/pooled.svg){width="13.73em" fig-alt="C_w equals the sum over pairs of w_ij times c_ij, divided by the sum over pairs of w_ij."}
 
 splits **exactly**:
 
-$$C_w = \frac{W_{ee}\,C_{ee} \;+\; W_{ec}\,C_{ec}}{W_{ee} + W_{ec}}$$
+![](formulas/decomposition.svg){width="20.86em" fig-alt="C_w equals W_ee times C_ee plus W_ec times C_ec, divided by W_ee plus W_ec."}
 
 ::: {.fragment .highlight-q}
 No new estimator. No added assumptions.<br>
@@ -745,6 +748,42 @@ No new estimator. No added assumptions.<br>
 
 ::: {.fragment}
 Matches `survival::concordance()` to machine precision, every tie pattern.
+:::
+
+## Each half is the same average, over its own pairs {.smaller .centred}
+
+Sort the comparable pairs by what happened to the later patient, *j*.
+
+::: {.columns}
+::: {.column width="50%"}
+![](formulas/ee.svg){width="18.3em" fig-alt="C_ee is the sum of w_ij times c_ij over the event-event pairs, divided by W_ee, the sum of their weights. Event-event pairs have T_i less than T_j, delta_i equal to 1 and delta_j equal to 1."}
+
+::: {.ee-tag}
+the hard task
+:::
+:::
+
+::: {.column width="50%"}
+![](formulas/ec.svg){width="18.3em" fig-alt="C_ec is the sum of w_ij times c_ij over the event-censored pairs, divided by W_ec, the sum of their weights. Event-censored pairs have T_i less than or equal to T_j, delta_i equal to 1 and delta_j equal to 0."}
+
+::: {.ec-tag}
+the easy task
+:::
+:::
+:::
+
+::: {.fragment .highlight-q}
+Same weights, same scoring. The two definitions differ only in *δ*~*j*~.
+:::
+
+::: {.notes}
+Read the symbols once: T is observed follow-up time, delta = 1 means the
+event was seen, and i is always the patient who had the event first. The one
+asymmetry is the tie rule: an event and a censoring on the same day count,
+with the event taken first, hence the less-than-or-equal in P_ec; two events
+on the same day do not count at all. That is survival::concordance()'s rule.
+Point at the W's: they are the weights in the identity on the previous slide,
+and censoring shrinks W_ee far faster than W_ec.
 :::
 
 ## You cannot escape this by... {.smaller}
